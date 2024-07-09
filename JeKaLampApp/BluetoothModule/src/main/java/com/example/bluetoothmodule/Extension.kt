@@ -34,6 +34,11 @@ fun Fragment.checkBtPermissions(): Boolean {
             requireContext(),
             Manifest.permission.BLUETOOTH_CONNECT
         ) == PackageManager.PERMISSION_GRANTED
+                &&
+        ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.BLUETOOTH_SCAN
+        ) == PackageManager.PERMISSION_GRANTED
     } else {
         ContextCompat.checkSelfPermission(
             requireContext(),
