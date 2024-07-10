@@ -6,7 +6,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:fitsSystemWindows">true</item>
+<!--        <item name="android:fitsSystemWindows">true</item>-->
     </style>
 
     <style name="Theme.JeKaLampApp" parent="Base.Theme.JeKaLampApp" />
