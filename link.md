@@ -4,3 +4,6 @@ https://www.youtube.com/watch?v=QKGdPJR_tbU&list=PLmjT2NFTgg1c-CQiAdezZpi9RaFmN1
 
 - сайт с кодом из видео уроков\
 https://neco-desarrollo.es/android-arduino-esp32
+
+
+a
