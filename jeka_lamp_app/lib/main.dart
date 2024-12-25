@@ -2,8 +2,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter/material.dart';
 import 'package:jeka_lamp_app/presentation/home_screen.dart';
+import 'package:jeka_lamp_app/locator_service.dart' as di;
 
-void main() {
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await di.init();
   runApp(const App());
 }
 
