@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jeka_lamp_app/presentation/bloc/bluetooth_control_cubit/bluetooth_control_state.dart';
+import 'package:jeka_lamp_app/core/bluetooth/bluetooth_control_state.dart';
 
 
 // это блютуз(определение есть ли блютуз или нет, подключение и проверка статуса подключения), я сделал уже кнопку которая должна в зависимости от state менять и цвет и саму иконку, 
