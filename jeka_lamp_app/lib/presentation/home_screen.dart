@@ -25,19 +25,14 @@ class _HomeScreenState extends State<HomeScreen> {
       label: "Effect",
     ),
     BottomNavigationElement(
-      widget: Center(child: Text("favorite")),
-      icon: Icon(Icons.bookmark_border),
-      label: "Favorite",
-    ),
-    BottomNavigationElement(
       widget: Center(child: Text("alarm")),
       icon: Icon(Icons.alarm),
       label: "Alarm",
     ),
     BottomNavigationElement(
-      widget: Center(child: Text("timer")),
-      icon: Icon(Icons.timer_outlined),
-      label: "Timer",
+      widget: Center(child: Text("network")),
+      icon: Icon(Icons.network_wifi),
+      label: "Network",
     ),
   ];
 
@@ -53,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
+      
       body: _navigationElements.elementAt(_selectedIndex).widget,
       bottomNavigationBar: NavigationBar(
         onDestinationSelected: _onNavigationItemTapped,

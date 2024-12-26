@@ -11,7 +11,7 @@ import 'package:jeka_lamp_app/presentation/bloc/bluetooth_control_cubit/bluetoot
 
 
 class BluetoothControlCubit extends Cubit<BluetoothControlState> {
-  BluetoothControlCubit(super.initialState);
+  BluetoothControlCubit() : super(BluetoothControlStartState());
 
   Future<void> init() async {
     // проверка включен ли блютуз
@@ -24,5 +24,4 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     // переход на NoConnection или Connection
     
   }
-
-} 
+}
