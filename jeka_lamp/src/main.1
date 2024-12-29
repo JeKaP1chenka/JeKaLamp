@@ -1,0 +1,98 @@
+#include <GyverOLED.h>
+
+// #include "BluetoothSerial.h"
+
+#include <BLE2902.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+
+String device_name = "ESP32-BT-Slave";
+
+// BluetoothSerial SerialBT;
+
+#define SERVICE_UUID "e8b74794-b088-4860-acc7-74503fe7cd38"
+#define CHARACTERISTIC_UUID "03aa76eb-c868-4f88-8a28-9e704a93c172"
+
+GyverOLED<SSD1306_128x64> oled;
+
+BLECharacteristic *pCharacteristic;
+bool deviceConnected = false;
+int txValue = 0;
+
+class MyServerCallbacks : public BLEServerCallbacks {
+  void onConnect(BLEServer *pServer) {
+    deviceConnected = true;
+    pCharacteristic->notify();
+  }
+
+  void onDisconnect(BLEServer *pServer) { deviceConnected = false; }
+};
+
+class MyCallbacks : public BLECharacteristicCallbacks {
+  void onWrite(BLECharacteristic *pCharacteristic) {
+    std::string value = pCharacteristic->getValue();
+
+    if (value.length() > 0) {
+      Serial.println("*********");
+      Serial.print("New value: ");
+      for (int i = 0; i < value.length(); i++) Serial.print(value[i]);
+
+      Serial.println();
+      Serial.println("*********");
+    }
+  }
+};
+
+void setup() {
+  Serial.begin(9600);
+  oled.init(21, 22);
+
+  BLEDevice::init("MyESP32");
+
+  BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+  pCharacteristic = pService->createCharacteristic(
+      CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                               BLECharacteristic::PROPERTY_WRITE |
+                               BLECharacteristic::PROPERTY_NOTIFY);
+
+  pCharacteristic->addDescriptor(new BLE2902());
+  pService->start();
+
+  pServer->getAdvertising()->start();
+  Serial.println("--- Wait ---");
+
+  // Serial.println("1- Download and install an BLE scanner app in your phone");
+  // Serial.println("2- Scan for BLE devices in the app");
+  // Serial.println("3- Connect to MyESP32");
+  // Serial.println(
+  //     "4- Go to CUSTOM CHARACTERISTIC in CUSTOM SERVICE and write
+  //     something");
+  // Serial.println("5- See the magic =)");
+
+  // pCharacteristic->setCallbacks(new MyCallbacks());
+
+  // pCharacteristic->setValue("Hello World");
+
+  // BLEAdvertising *pAdvertising = pServer->getAdvertising();
+  // pAdvertising->start();
+}
+
+void loop() {
+  if (deviceConnected) {
+    oled.clear();
+    oled.home();
+    oled.autoPrintln(true);
+    oled.setScale(1);
+    Serial.print("clear");
+    oled.print("clear");
+    oled.update();
+  } else {
+    oled.clear();
+    oled.update();
+  }
+  delay(2000);
+}

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect.dart';
 import 'package:jeka_lamp_app/core/utils/bottom_navigation_element.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect_page.dart';
+import 'package:jeka_lamp_app/locator_service.dart' as di;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,12 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         SizedBox(width: 4),
-        IconButton(
-          onPressed: () {},
-          // bluetooth_connected
-          // bluetooth_disabled
-          icon: Icon(Icons.bluetooth),
-        ),
+        di.s1<BluetoothConnect>().bluetoothButton(),
         SizedBox(width: 8),
       ],
     );
