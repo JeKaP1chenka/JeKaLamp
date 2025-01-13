@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_control_state.dart';
+import 'package:jeka_lamp_app/core/bluetooth/choosing_ble/choosing_ble_devices_cubit.dart';
+import 'package:jeka_lamp_app/core/bluetooth/choosing_ble/choosing_ble_devices_state.dart';
+import 'package:jeka_lamp_app/core/bluetooth/choosing_ble/choosing_ble_devices_widget.dart';
 
 // это блютуз(определение есть ли блютуз или нет, подключение и проверка статуса подключения), я сделал уже кнопку которая должна в зависимости от state менять и цвет и саму иконку,
 // пример если блютуз не включен то иконка серая и специальная иконка, при нажатии будет вылетать уведомление включить блутуз,
@@ -17,11 +21,11 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
   BluetoothControlCubit() : super(BluetoothControlStartState());
 
   late StreamSubscription<BluetoothAdapterState> _bluetoothAdapterListener;
-  late StreamSubscription<List<ScanResult>> _scanResultsListener;
-  final StreamController<List<ScanResult>> _scanResultsController =
-      StreamController<List<ScanResult>>.broadcast();
-  Stream<List<ScanResult>> get scanResultsStream =>
-      _scanResultsController.stream;
+  // late StreamSubscription<List<ScanResult>> _scanResultsListener;
+  // final StreamController<List<ScanResult>> _scanResultsController =
+  // StreamController<List<ScanResult>>.broadcast();
+  // Stream<List<ScanResult>> get scanResultsStream =>
+  // _scanResultsController.stream;
 
   void _adapterListener(BluetoothAdapterState state) {
     print(state);
@@ -58,7 +62,13 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
 
   Future<void> turnOnEvent() async {
     if (Platform.isAndroid) {
-      await FlutterBluePlus.turnOn();
+      try {
+        await FlutterBluePlus.turnOn(timeout: pow(2, 30) as int);
+      } on FlutterBluePlusException {
+        emit(BluetoothControlTurnItOnState());
+      } catch (e) {
+        print("Unknown exception: $e");
+      }
     } else {
       emit(BluetoothControlTurnItOnState());
     }
@@ -75,41 +85,68 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
   //     timeout: Duration(seconds: 15),
   //   );
   // }
-  late bool isScanDevice = false;
-  Future<void> connectDevice() async {
-    _scanResultsController.add([]);
-    emit(BluetoothControlConnectDeviceState([]));
 
-    _scanResultsListener = FlutterBluePlus.onScanResults.listen(
-      (results) {
-        isScanDevice = true;
-        _scanResultsController.add(results);
+  // late bool isScanDevice = false;
+  Future<void> connectDevice(BuildContext context) async {
+    _bluetoothAdapterListener.pause();
+    final choosingBleDevicesCubit = ChoosingBleDevicesCubit()..scan();
+    final result = await showDialog<BluetoothDevice?>(
+      context: context,
+      builder: (context) {
+        return BlocProvider(
+          create: (context) => choosingBleDevicesCubit,
+          child: ChoosingBleDevicesWidget(),
+        );
       },
-      onDone: () {
-        isScanDevice = false;
-      },
-      onError: (e) => print(e),
     );
 
-    await startScanDevice();
+    _bluetoothAdapterListener.resume();
+
+    if (result != null) {
+      // Обработка выбранного устройства
+      print("Выбрано устройство: ${result.advName}");
+      // Сохраните устройство или выполните подключение
+    } else {
+      // Ничего не выбрано
+      print("Устройство не выбрано.");
+    }
+
+    print("test alskdj;alskdj;alskjd;laksjd;laksjd");
+
+    // _scanResultsController.add([]);
+    // emit(BluetoothControlConnectDeviceState([]));
+
+    // _scanResultsListener = FlutterBluePlus.onScanResults.listen(
+    //   (results) {
+    //     isScanDevice = true;
+    //     _scanResultsController.add(results);
+    //   },
+    //   onDone: () {
+    //     isScanDevice = false;
+    //     _bluetoothAdapterListener.resume();
+    //   },
+    //   onError: (e) => print(e),
+    // );
+
+    // await startScanDevice();
   }
 
-  Future<void> startScanDevice() async {
-    await FlutterBluePlus.startScan(
-      continuousUpdates: true,
-      removeIfGone: Duration(seconds: 1),
-      timeout: Duration(seconds: 1),
-    );
-  }
+  // Future<void> startScanDevice() async {
+  //   await FlutterBluePlus.startScan(
+  //     continuousUpdates: true,
+  //     removeIfGone: Duration(seconds: 1),
+  //     timeout: Duration(seconds: 1),
+  //   );
+  // }
 
-  Future<void> connectDeviceCancel() async {
-    _scanResultsListener.cancel();
-  }
+  // Future<void> connectDeviceCancel() async {
+  //   _scanResultsListener.cancel();
+  // }
 
   @override
   Future<void> close() {
     _bluetoothAdapterListener.cancel();
-    _scanResultsController.close(); // Закрываем поток при уничтожении Cubit
+    // _scanResultsController.close(); // Закрываем поток при уничтожении Cubit
     return super.close();
   }
 }
