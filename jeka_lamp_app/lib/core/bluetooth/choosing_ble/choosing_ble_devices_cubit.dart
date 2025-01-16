@@ -10,7 +10,6 @@ import 'package:jeka_lamp_app/core/bluetooth/choosing_ble/choosing_ble_devices_s
 
 class ChoosingBleDevicesCubit extends Cubit<ChoosingBleDevicesState> {
   late StreamSubscription<List<ScanResult>> _scanResultsListener;
-  late List<ScanResult> devices = [];
   final StreamController<List<ScanResult>> _scanResultsController =
       StreamController<List<ScanResult>>.broadcast();
   Stream<List<ScanResult>> get scanResultsStream =>
@@ -21,18 +20,25 @@ class ChoosingBleDevicesCubit extends Cubit<ChoosingBleDevicesState> {
 
   Future<void> scan() async {
     _scanResultsController.add([]);
-    // emit(BluetoothControlConnectDeviceState([]));
 
     emit(CBDLoading());
 
     _scanResultsListener = FlutterBluePlus.onScanResults.listen(
       (results) {
-        devices = results;
         _scanResultsController.add(results);
+        if (device != null &&
+            results
+                .where(
+                  (element) =>
+                      element.device.advName == device!.advName &&
+                      element.device.remoteId.str == device!.remoteId.str,
+                )
+                .isEmpty) {
+          device = null;
+          emit(CBDLoaded());
+        }
       },
-      onDone: () {
-        emit(CBDLoaded());
-      },
+      onDone: () {},
       onError: (e) => print(e),
     );
 
@@ -40,11 +46,10 @@ class ChoosingBleDevicesCubit extends Cubit<ChoosingBleDevicesState> {
   }
 
   Future<void> startScan() async {
-    devices.clear();
     await FlutterBluePlus.startScan(
+      withKeywords: [""],
       continuousUpdates: true,
       removeIfGone: Duration(seconds: 1),
-      // timeout: Duration(seconds: 1),
     );
   }
 
@@ -53,10 +58,16 @@ class ChoosingBleDevicesCubit extends Cubit<ChoosingBleDevicesState> {
     emit(CBDSelected());
   }
 
-  Future<void> closeDialog(BuildContext context) async {
-    await FlutterBluePlus.stopScan();
-    _scanResultsController.close();
+  Future<void> closeDialogWithDevice(BuildContext context) async {
     Navigator.pop(context, device);
   }
 
+  Future<void> closeDialog(BuildContext context) async {
+    Navigator.pop(context, null);
+  }
+
+  Future<void> stop() async {
+    await FlutterBluePlus.stopScan();
+    _scanResultsController.close();
+  }
 }

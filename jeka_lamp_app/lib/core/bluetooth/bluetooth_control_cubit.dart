@@ -28,7 +28,7 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
   // _scanResultsController.stream;
 
   void _adapterListener(BluetoothAdapterState state) {
-    print(state);
+    debugPrint(state.toString());
     if (state == BluetoothAdapterState.on) {
       //! вызвать метод который проверит было ли в прошлом подключение и если было то сразу подключит
       emit(BluetoothControlNoConnectionState());
@@ -60,10 +60,10 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
   // void cancel() {
   // }
 
-  Future<void> turnOnEvent() async {
+  void turnOnEvent(BuildContext context) {
     if (Platform.isAndroid) {
       try {
-        await FlutterBluePlus.turnOn(timeout: pow(2, 30) as int);
+        FlutterBluePlus.turnOn(timeout: pow(2, 30) as int);
       } on FlutterBluePlusException {
         emit(BluetoothControlTurnItOnState());
       } catch (e) {
@@ -72,6 +72,7 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     } else {
       emit(BluetoothControlTurnItOnState());
     }
+    chooseDevice(context);
   }
 
   // Future<void> connectDevice() async {
@@ -87,7 +88,7 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
   // }
 
   // late bool isScanDevice = false;
-  Future<void> connectDevice(BuildContext context) async {
+  Future<void> chooseDevice(BuildContext context) async {
     _bluetoothAdapterListener.pause();
     final choosingBleDevicesCubit = ChoosingBleDevicesCubit()..scan();
     final result = await showDialog<BluetoothDevice?>(
@@ -103,32 +104,58 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     _bluetoothAdapterListener.resume();
 
     if (result != null) {
-      // Обработка выбранного устройства
       print("Выбрано устройство: ${result.advName}");
-      // Сохраните устройство или выполните подключение
+      // connectAndSendMessage(result);
+      connectDevice(result);
     } else {
-      // Ничего не выбрано
       print("Устройство не выбрано.");
     }
+  }
 
-    print("test alskdj;alskdj;alskjd;laksjd;laksjd");
+  Future<void> connectDevice(BluetoothDevice device) async {
+    
+  }
 
-    // _scanResultsController.add([]);
-    // emit(BluetoothControlConnectDeviceState([]));
+  Future<void> connectAndSendMessage(BluetoothDevice device) async {
+    try {
+      // Подключаемся к устройству
+      await device.connect();
+      print("Подключено к устройству: ${device.advName}");
 
-    // _scanResultsListener = FlutterBluePlus.onScanResults.listen(
-    //   (results) {
-    //     isScanDevice = true;
-    //     _scanResultsController.add(results);
-    //   },
-    //   onDone: () {
-    //     isScanDevice = false;
-    //     _bluetoothAdapterListener.resume();
-    //   },
-    //   onError: (e) => print(e),
-    // );
+      // Получаем характеристики устройства
+      List<BluetoothService> services = await device.discoverServices();
+      // Ищем характеристику, в которую можно записать данные
+      BluetoothCharacteristic? writeCharacteristic =
+          services[2].characteristics[0];
+      // for (BluetoothService service in services) {
+      //   for (BluetoothCharacteristic characteristic
+      //       in service.characteristics) {
+      //     if (characteristic.properties.write) {
+      //       writeCharacteristic = characteristic;
+      //       break;
+      //     }
+      //   }
+      //   if (writeCharacteristic != null) {
+      //     break;
+      //   }
+      // }
 
-    // await startScanDevice();
+      if (writeCharacteristic == null) {
+        print("Не удалось найти подходящую характеристику для записи.");
+        return;
+      }
+
+      // Отправляем тестовое сообщение
+      List<int> message = [72, 101, 108, 108, 111]; // "Hello" в виде байтов
+      await writeCharacteristic.write(message);
+      print("Сообщение отправлено: Hello");
+
+      // После отправки отключаемся от устройства
+      await device.disconnect();
+      print("Отключено от устройства: ${device.advName}");
+    } catch (e) {
+      print("Ошибка при подключении или отправке данных: $e");
+    }
   }
 
   // Future<void> startScanDevice() async {

@@ -8,17 +8,9 @@ class ChoosingBleDevicesState extends Equatable {
   List<Object?> get props => [];
 }
 
-class CBDLoading extends ChoosingBleDevicesState {
-  // List<ScanResult> devices;
+class CBDLoading extends ChoosingBleDevicesState {}
 
-  // CBDLoading({required this.devices});
-}
-
-class CBDLoaded extends ChoosingBleDevicesState {
-  // List<ScanResult> devices;
-
-  // CBDLoaded({required this.devices});
-}
+class CBDLoaded extends ChoosingBleDevicesState {}
 
 class CBDSelected extends ChoosingBleDevicesState {}
 

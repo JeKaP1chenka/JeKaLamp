@@ -19,15 +19,14 @@ class _ChoosingBleDevicesWidgetState extends State<ChoosingBleDevicesWidget> {
   // BluetoothDevice? _selectedDevice;
   // bool _isLoading = true;
 
+  late var cubit = context.read<ChoosingBleDevicesCubit>();
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChoosingBleDevicesCubit, ChoosingBleDevicesState>(
       builder: (context, state) {
         print(
             "-----------------------ChoosingBleDevicesCubit ${state.toString()}");
-        if (state is CBDLoaded) {
-        } else if (state is CBDLoading) {
-        } else if (state is CBDSelected) {}
         return Dialog(
           child: ConstrainedBox(
             constraints: BoxConstraints(
@@ -58,7 +57,7 @@ class _ChoosingBleDevicesWidgetState extends State<ChoosingBleDevicesWidget> {
       children: [
         // SizedBox(height: 1,),
         Padding(
-          padding: const EdgeInsets.only(left: 16),
+          padding: const EdgeInsets.all(8),
           child: Text(
             "Выбор устройства",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -76,34 +75,37 @@ class _ChoosingBleDevicesWidgetState extends State<ChoosingBleDevicesWidget> {
 
   _devicesList(BuildContext context, ChoosingBleDevicesState state) {
     // var s = state as CBDLoaded;
-    return StreamBuilder(
-      stream: context.read<ChoosingBleDevicesCubit>().scanResultsStream,
-      builder: (context, snapshot) {
-        final results = snapshot.data ?? [];
+    return Expanded(
+      flex: 1,
+      child: StreamBuilder(
+        stream: cubit.scanResultsStream,
+        builder: (context, snapshot) {
+          final results = snapshot.data ?? [];
 
-        return ListView.builder(
-          shrinkWrap: true, // Ограничиваем высоту списка
-          itemCount: results.length,
-          itemBuilder: (context, index) {
-            final device = results[index].device;
-            final isSelected = state is CBDSelected &&
-                device == context.read<ChoosingBleDevicesCubit>().device;
-            return ListTile(
-              title: Text(
-                  device.advName != "" ? device.advName : device.remoteId.str),
-              leading: isSelected
-                  ? const Icon(Icons.check_circle, color: Colors.green)
-                  : const Icon(Icons.circle_outlined),
-              onTap: () {
-                context.read<ChoosingBleDevicesCubit>().selectDevice(device);
-                // setState(() {
-                //   _selectedDevice = device;
-                // });
-              },
-            );
-          },
-        );
-      },
+          return ListView.builder(
+            shrinkWrap: true, // Ограничиваем высоту списка
+            itemCount: results.length,
+            itemBuilder: (context, index) {
+              final device = results[index].device;
+              final isSelected = state is CBDSelected && device == cubit.device;
+              return ListTile(
+                title: Text(device.advName != ""
+                    ? device.advName
+                    : device.remoteId.str),
+                leading: isSelected
+                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    : const Icon(Icons.circle_outlined),
+                onTap: () {
+                  cubit.selectDevice(device);
+                  // setState(() {
+                  //   _selectedDevice = device;
+                  // });
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -115,15 +117,14 @@ class _ChoosingBleDevicesWidgetState extends State<ChoosingBleDevicesWidget> {
         children: [
           TextButton(
             onPressed: () {
-              closeDialog(context);
+              cubit.closeDialog(context);
             },
             child: Text("отмена"),
           ),
           TextButton(
             onPressed: state is CBDSelected
                 ? () {
-                    closeDialog(context);
-                    
+                    cubit.closeDialogWithDevice(context);
                   }
                 : null,
             child: Text("выбрать"),
@@ -133,8 +134,10 @@ class _ChoosingBleDevicesWidgetState extends State<ChoosingBleDevicesWidget> {
     );
   }
 
-  closeDialog(BuildContext context) {
-    context.read<ChoosingBleDevicesCubit>().closeDialog(context);
+  @override
+  void deactivate() {
+    cubit.stop();
+    super.deactivate();
   }
 
   // Future.microtask(

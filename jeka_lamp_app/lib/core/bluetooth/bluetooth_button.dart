@@ -42,7 +42,7 @@ class BluetoothButton extends StatelessWidget {
   Widget bluetoothOff(BuildContext context) {
     return IconButton(
       onPressed: () {
-        context.read<BluetoothControlCubit>().turnOnEvent();
+        context.read<BluetoothControlCubit>().turnOnEvent(context);
       },
       color: const Color.fromARGB(255, 255, 56, 56),
       icon: Icon(Icons.bluetooth_disabled),
@@ -52,7 +52,7 @@ class BluetoothButton extends StatelessWidget {
   Widget bluetoothNoConnection(BuildContext context) {
     return IconButton(
       onPressed: () {
-        context.read<BluetoothControlCubit>().connectDevice(context);
+        context.read<BluetoothControlCubit>().chooseDevice(context);
       },
       // color: const Color.fromARGB(255, 240, 43, 43),
       icon: Icon(Icons.bluetooth),
@@ -62,7 +62,7 @@ class BluetoothButton extends StatelessWidget {
   Widget bluetoothConnection(BuildContext context) {
     return IconButton(
       onPressed: () {
-        context.read<BluetoothControlCubit>().connectDevice(context);
+        context.read<BluetoothControlCubit>().chooseDevice(context);
       },
       color: const Color.fromARGB(255, 58, 245, 34),
       icon: Icon(Icons.bluetooth),

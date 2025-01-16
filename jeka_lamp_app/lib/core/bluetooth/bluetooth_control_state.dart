@@ -20,18 +20,4 @@ class BluetoothControlTurnItOnState extends BluetoothControlState {}
 
 class BluetoothControlNoConnectionState extends BluetoothControlState {}
 
-// class BluetoothControlConnectDeviceState extends BluetoothControlState {
-//   final List<ScanResult> results;
-//   const BluetoothControlConnectDeviceState(this.results);
-
-//   @override
-//   List<Object?> get props => [results];
-// }
-
-
-
 class BluetoothControlConnectionState extends BluetoothControlState {}
-
-// class BluetoothControlDisconnectionState extends BluetoothControlState {}
-
-// class BluetoothControlErrorState extends BluetoothControlState {}

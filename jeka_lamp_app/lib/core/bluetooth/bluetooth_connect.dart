@@ -10,12 +10,12 @@ class BluetoothConnect {
     bluetoothControlCubit ??= BluetoothControlCubit();
     bluetoothControlCubit?.initEvent();
     return bluetoothControlCubit!;
-    
   }
 
-  Widget bluetoothButton(){
-    if (bluetoothControlCubit == null){
-      throw Exception("BluetoothControlCubit не инициализирован. Вызовите init() перед использованием bluetoothButton().");
+  Widget bluetoothButton() {
+    if (bluetoothControlCubit == null) {
+      throw Exception(
+          "BluetoothControlCubit не инициализирован. Вызовите init() перед использованием bluetoothButton().");
     }
     return BlocProvider.value(
       value: bluetoothControlCubit!,
