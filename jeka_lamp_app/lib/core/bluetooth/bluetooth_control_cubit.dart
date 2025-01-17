@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect.dart';
 
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_control_state.dart';
 import 'package:jeka_lamp_app/core/bluetooth/choosing_ble/choosing_ble_devices_cubit.dart';
@@ -18,21 +19,31 @@ import 'package:jeka_lamp_app/core/bluetooth/choosing_ble/choosing_ble_devices_w
 // если подключение сорвалось то кнопка меняет иконку на четвертую и меняет цвет на красный, при нажатии(тут я не совсем продумал как лучше сделать но этот state лучше сделать может быть придумаю на него функционал)
 
 class BluetoothControlCubit extends Cubit<BluetoothControlState> {
-  BluetoothControlCubit() : super(BluetoothControlStartState());
-
+  BluetoothControlCubit(this._bluetoothConnect)
+      : super(BluetoothControlStartState());
+  final BluetoothConnect _bluetoothConnect;
   late StreamSubscription<BluetoothAdapterState> _bluetoothAdapterListener;
-  // late StreamSubscription<List<ScanResult>> _scanResultsListener;
-  // final StreamController<List<ScanResult>> _scanResultsController =
-  // StreamController<List<ScanResult>>.broadcast();
-  // Stream<List<ScanResult>> get scanResultsStream =>
-  // _scanResultsController.stream;
+  Stream<BluetoothConnectionState>? _bluetoothConnectionStream;
+  StreamSubscription<BluetoothConnectionState>? _bluetoothConnectionListener;
+  BluetoothDevice? device;
 
-  void _adapterListener(BluetoothAdapterState state) {
+  void _connectionListener(BluetoothConnectionState state) {
+    debugPrint(state.toString());
+    if (state == BluetoothConnectionState.connected) {
+      emit(BluetoothControlConnectionState());
+    } else if (state == BluetoothConnectionState.disconnected) {
+      emit(BluetoothControlNoConnectionState());
+    }
+  }
+
+  void _adapterListener(BluetoothAdapterState state) async {
     debugPrint(state.toString());
     if (state == BluetoothAdapterState.on) {
       //! вызвать метод который проверит было ли в прошлом подключение и если было то сразу подключит
       emit(BluetoothControlNoConnectionState());
     } else if (state == BluetoothAdapterState.off) {
+      await _bluetoothConnectionListener?.cancel();
+      _bluetoothConnectionListener = null;
       emit(BluetoothControlOffState());
     } else {
       // show an error to the user, etc
@@ -48,8 +59,6 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     }
     _bluetoothAdapterListener =
         FlutterBluePlus.adapterState.listen(_adapterListener);
-    // _bluetoothAdapterListener.cancel();
-    // checkingPreviousConnection();
   }
 
   Future<void> checkingPreviousConnection() async {
@@ -57,13 +66,10 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     // переход на NoConnection или Connection
   }
 
-  // void cancel() {
-  // }
-
-  void turnOnEvent(BuildContext context) {
+  void turnOnEvent(BuildContext context) async {
     if (Platform.isAndroid) {
       try {
-        FlutterBluePlus.turnOn(timeout: pow(2, 30) as int);
+        await FlutterBluePlus.turnOn(timeout: pow(2, 30) as int);
       } on FlutterBluePlusException {
         emit(BluetoothControlTurnItOnState());
       } catch (e) {
@@ -75,19 +81,6 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     chooseDevice(context);
   }
 
-  // Future<void> connectDevice() async {
-  //   _scanResultsListener = FlutterBluePlus.onScanResults.listen(
-  //     scanResults,
-  //     onError: (e) => print(e),
-  //   );
-  //   await FlutterBluePlus.startScan(
-  //     // withServices: [Guid("180D")], // match any of the specified services
-  //     // withNames: ["Bluno"], // *or* any of the specified names
-  //     timeout: Duration(seconds: 15),
-  //   );
-  // }
-
-  // late bool isScanDevice = false;
   Future<void> chooseDevice(BuildContext context) async {
     _bluetoothAdapterListener.pause();
     final choosingBleDevicesCubit = ChoosingBleDevicesCubit()..scan();
@@ -106,14 +99,39 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     if (result != null) {
       print("Выбрано устройство: ${result.advName}");
       // connectAndSendMessage(result);
-      connectDevice(result);
+      device = result;
+      connectDevice();
     } else {
       print("Устройство не выбрано.");
     }
   }
 
-  Future<void> connectDevice(BluetoothDevice device) async {
-    
+  Future<void> connectDevice() async {
+    try {
+      if (device != null) {
+        await device!.connect();
+        _bluetoothConnectionStream = device!.connectionState;
+        _bluetoothConnectionListener = _bluetoothConnectionStream!.listen(
+          _connectionListener,
+          onDone: () {},
+          onError: (error) {},
+        );
+      }
+    } catch (e) {
+      print("Ошибка при подключении или отправке данных: $e");
+    }
+  }
+
+  Future<void> disconnect(BuildContext context) async {
+    try {
+      if (device != null) {
+        await device!.disconnect();
+        _bluetoothConnectionStream = null;
+        _bluetoothConnectionListener = null;
+      }
+    } catch (e) {
+      print("Ошибка при подключении или отправке данных: $e");
+    }
   }
 
   Future<void> connectAndSendMessage(BluetoothDevice device) async {
@@ -158,22 +176,10 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
     }
   }
 
-  // Future<void> startScanDevice() async {
-  //   await FlutterBluePlus.startScan(
-  //     continuousUpdates: true,
-  //     removeIfGone: Duration(seconds: 1),
-  //     timeout: Duration(seconds: 1),
-  //   );
-  // }
-
-  // Future<void> connectDeviceCancel() async {
-  //   _scanResultsListener.cancel();
-  // }
-
   @override
-  Future<void> close() {
-    _bluetoothAdapterListener.cancel();
-    // _scanResultsController.close(); // Закрываем поток при уничтожении Cubit
+  Future<void> close() async {
+    await _bluetoothAdapterListener.cancel();
+    await _bluetoothConnectionListener?.cancel();
     return super.close();
   }
 }

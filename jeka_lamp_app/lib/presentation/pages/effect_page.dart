@@ -8,7 +8,10 @@ class EffectPage extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(8),
       child: Center(
-        child: Text("Effect_page"),
+        child: IconButton(
+          onPressed: (){},
+          icon: Icon(Icons.abc),
+        ),
       ),
     );
   }

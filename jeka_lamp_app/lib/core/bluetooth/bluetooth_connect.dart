@@ -7,8 +7,8 @@ class BluetoothConnect {
   BluetoothControlCubit? bluetoothControlCubit;
 
   BluetoothControlCubit init() {
-    bluetoothControlCubit ??= BluetoothControlCubit();
-    bluetoothControlCubit?.initEvent();
+    bluetoothControlCubit ??= BluetoothControlCubit(this);
+    bluetoothControlCubit!.initEvent();
     return bluetoothControlCubit!;
   }
 

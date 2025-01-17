@@ -68,6 +68,6 @@ class ChoosingBleDevicesCubit extends Cubit<ChoosingBleDevicesState> {
 
   Future<void> stop() async {
     await FlutterBluePlus.stopScan();
-    _scanResultsController.close();
+    await _scanResultsController.close();
   }
 }

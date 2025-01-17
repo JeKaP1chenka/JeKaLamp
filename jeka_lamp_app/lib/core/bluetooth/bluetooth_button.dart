@@ -25,12 +25,8 @@ class BluetoothButton extends StatelessWidget {
           return bluetoothTurnItOn(context);
         } else if (state is BluetoothControlNoConnectionState) {
           return bluetoothNoConnection(context);
-          // } else if (state is BluetoothControlConnectDeviceState) {
-          // return bluetoothConnectDevice(context, state);
         } else if (state is BluetoothControlConnectionState) {
           return bluetoothConnection(context);
-          // } else if (state is BluetoothControlDisconnectionState) {
-          //   return bluetoothDisconnection(context);
         } else {
           // error
           return bluetoothError(context);
@@ -62,7 +58,7 @@ class BluetoothButton extends StatelessWidget {
   Widget bluetoothConnection(BuildContext context) {
     return IconButton(
       onPressed: () {
-        context.read<BluetoothControlCubit>().chooseDevice(context);
+        context.read<BluetoothControlCubit>().disconnect(context);
       },
       color: const Color.fromARGB(255, 58, 245, 34),
       icon: Icon(Icons.bluetooth),

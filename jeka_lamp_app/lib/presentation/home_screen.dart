@@ -50,20 +50,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(),
-      
-      body: _navigationElements.elementAt(_selectedIndex).widget,
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: _onNavigationItemTapped,
-        selectedIndex: _selectedIndex,
-        destinations: <NavigationDestination>[
-          for (var i in _navigationElements) i.item
-        ],
+      body: IgnorePointer(
+        ignoring: false,
+        child: _navigationElements.elementAt(_selectedIndex).widget,
+      ),
+      bottomNavigationBar: IgnorePointer(
+        ignoring: false,
+        child: NavigationBar(
+          onDestinationSelected: _onNavigationItemTapped,
+          selectedIndex: _selectedIndex,
+          destinations: <NavigationDestination>[
+            for (var i in _navigationElements) i.item
+          ],
+        ),
       ),
     );
   }
 
   AppBar buildAppBar() {
-    
     return AppBar(
       title: Text("JeKaLampApp"),
       actions: [
@@ -82,10 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        SizedBox(width: 4),
+        // SizedBox(width: 4),
         di.s1<BluetoothConnect>().bluetoothButton(),
-        SizedBox(width: 8),
-      ],
+        SizedBox(width: 4),
+      ], 
     );
   }
 }
