@@ -2,14 +2,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'package:flutter/material.dart';
+import 'package:jeka_lamp_app/app_theme.dart';
 
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect.dart';
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_control_cubit.dart';
-import 'package:jeka_lamp_app/presentation/home_screen.dart';
+import 'package:jeka_lamp_app/presentation/home_screen/home_screen.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
+import 'package:jeka_lamp_app/presentation/home_screen/home_screen_cubit.dart';
+import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
+
+
 
 void main() async {
-  FlutterBluePlus.setLogLevel(LogLevel.verbose, color:true);
+  FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   WidgetsFlutterBinding.ensureInitialized();
   await di.init();
   runApp(const App());
@@ -22,9 +27,13 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<BluetoothControlCubit>(
-          create: (context) => di.s1<BluetoothConnect>().bluetoothControlCubit!..initEvent(),
+        BlocProvider<EffectCubit>(
+          create: (context) => di.s1<EffectCubit>(),
         ),
+        BlocProvider<HomeScreenCubit>(
+          create: (context) => di.s1<HomeScreenCubit>(),
+        ),
+
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,
@@ -36,17 +45,3 @@ class App extends StatelessWidget {
   }
 }
 
-class AppTheme {
-  static ThemeData darkTheme = ThemeData.dark().copyWith(
-      scaffoldBackgroundColor: Colors.grey[700],
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.grey[850],
-      ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.grey[850],
-      ));
-
-  static ThemeData lightTheme = ThemeData.light().copyWith(
-    scaffoldBackgroundColor: Colors.white,
-  );
-}

@@ -28,5 +28,8 @@ dev_dependencies:
   cached_network_image: ^3.4.1
   flutter_blue_plus: ^1.34.5
 
+  # dropDownButton2
+  dropdown_button2: ^2.3.9
+
 flutter:
   uses-material-design: true

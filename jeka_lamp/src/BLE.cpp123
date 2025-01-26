@@ -1,0 +1,34 @@
+#ifndef __BLE_CPP__
+#define __BLE_CPP__
+
+#include <BLE.hpp>
+
+namespace BLE {
+
+void initBLE(LampSettings *lampSettings) {}
+
+namespace Callbacks {
+ServerCallbacks::ServerCallbacks(LampSettings *lampSettings) {}
+
+void ServerCallbacks::onConnect(BLEServer *pServer) {}
+
+void ServerCallbacks::onDisconnect(BLEServer *pServer) {}
+
+LampOnOffCallbacks::LampOnOffCallbacks(LampSettings *lampSettings) {}
+
+void LampOnOffCallbacks::onWrite(BLECharacteristic *pCharacteristic) {}
+
+void LampOnOffCallbacks::onRead(BLECharacteristic *pCharacteristic) {}
+
+EffectParametersCallbacks::EffectParametersCallbacks(
+    LampSettings *lampSettings) {}
+
+void EffectParametersCallbacks::onWrite(BLECharacteristic *pCharacteristic) {}
+
+void EffectParametersCallbacks::onRead(BLECharacteristic *pCharacteristic) {}
+
+}  // namespace Callbacks
+
+}  // namespace BLE
+
+#endif  // __BLE_CPP__

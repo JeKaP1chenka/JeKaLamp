@@ -1,113 +1,101 @@
-#include <Arduino.h>
-#include <BLE2902.h>
-#include <BLEDevice.h>
-#include <BLEServer.h>
-#include <BLEUtils.h>
-#include <GyverOLED.h>
-// Название BLE-сервера
-#define BLE_SERVER_NAME "ESP32_BLE_Server"
-
-// UUID сервиса и характеристики
-#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
-#define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+#include <main.hpp>
 
 // Глобальные переменные
-BLECharacteristic *pCharacteristic;
-BLEServer *pServer;
-bool deviceConnected = false;
+
+// uint8_t myData[2] = {0, 0};
+// int idx = 0;
 
 GyverOLED<SSD1306_128x64> oled;
 
-// Класс для обработки соединения
-class MyServerCallbacks : public BLEServerCallbacks {
-  void onConnect(BLEServer *pServer) {
-    deviceConnected = true;
-    Serial.println("Устройство подключено.");
-    oled.clear();
-    oled.setCursor(0, 1);
-    oled.autoPrintln(true);
-    oled.setScale(1);
-    oled.print("подключено");
-    oled.update();
-  }
+LampSettings lampSettings;
 
-  void onDisconnect(BLEServer *pServer) {
-    deviceConnected = false;
-    Serial.println("Устройство отключено.");
-    oled.setCursor(0, 1);
-    oled.autoPrintln(true);
-    oled.setScale(1);
+
+void updateDisplay(bool isConnect) {
+  oled.clear();
+
+  oled.setCursor(0, 4);
+  oled.printf("%d", lampSettings.onOff);
+  oled.setCursor(0, 5);
+  oled.printf("%d  %d  %d  %d  %d  ", lampSettings.effectType,
+              lampSettings.brightness, lampSettings.speed,
+              lampSettings.effectParameter, lampSettings.microphone);
+
+  oled.setCursor(0, 0);
+  if (!isConnect) {
     oled.print("отключено");
-    oled.update();
-    // Перезапуск рекламирования BLE
-    pServer->getAdvertising()->start();
-    Serial.println("Рекламирование BLE перезапущено.");
-    oled.setCursor(0, 2);
-    oled.autoPrintln(true);
-    oled.setScale(1);
-    oled.print("перезапущено");
-    oled.update();
+  } else {
+    oled.print("подключено");
   }
-};
 
-// Класс для обработки передачи данных
-class MyCallbacks : public BLECharacteristicCallbacks {
-  void onWrite(BLECharacteristic *pCharacteristic) {
-    std::string value = pCharacteristic->getValue();
+  oled.update();
+}
 
-    if (value.length() > 0) {
-      Serial.println("Получена строка от клиента:");
-      Serial.println(value.c_str());
-      oled.setCursor(0, 0);
-      oled.autoPrintln(true);
-      oled.setScale(1);
-      oled.print(value.c_str());
-      oled.update();
-    }
-  }
-};
+
 
 void setup() {
   Serial.begin(115200);
+
+  BLE::initBLE(&lampSettings);
+  // enc1.setBtnLevel(LOW);
+  // enc1.setClickTimeout(500);
+  // enc1.setDebTimeout(50);
+  // enc1.setHoldTimeout(600);
+  // enc1.setStepTimeout(200);
+  // enc1.setEncReverse(0);
+  // // EB_STEP4_LOW, EB_STEP4_HIGH, EB_STEP2, EB_STEP1
+  // enc1.setEncType(EB_STEP4_HIGH);
+  // enc1.setFastTimeout(30);
+  // // enc1.setType(TYPE2);
+
+  pinMode(17, INPUT_PULLUP);
+
   oled.init(21, 22);
   oled.clear();
   oled.home();
   oled.autoPrintln(true);
   oled.setScale(1);
-  // Serial.print("clear");
   oled.print("");
   oled.update();
-  Serial.println("Запуск BLE-сервера...");
-
-  // Инициализация BLE
-  BLEDevice::init(BLE_SERVER_NAME);
-
-  // Создание BLE-сервера
-  pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new MyServerCallbacks());
-
-  // Создание BLE-сервиса
-  BLEService *pService = pServer->createService(SERVICE_UUID);
-
-  // Создание BLE-характеристики
-  pCharacteristic = pService->createCharacteristic(
-      CHARACTERISTIC_UUID,
-      BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE);
-
-  pCharacteristic->setCallbacks(new MyCallbacks());
-  pCharacteristic->addDescriptor(new BLE2902());
-
-  // Запуск сервиса
-  pService->start();
-
-  // Рекламирование BLE
-  pServer->getAdvertising()->start();
-  Serial.println("BLE-сервер запущен и ожидает подключений.");
 }
 
+bool switchBtn = true;
 void loop() {
   // Основной цикл
-  if (deviceConnected) {
+  auto btn = digitalRead(17);
+  // Serial.printf("%d %d\n", switchBtn, btn);
+  updateDisplay(lampSettings.deviceConnected);
+  if (!btn and switchBtn) {
+    switchBtn = false;
+
+    lampSettings.effectType = rand() % 10;
+    lampSettings.brightness = rand() % 256;
+    lampSettings.speed = rand() % 256;
+    lampSettings.effectParameter = rand() % 256;
+    lampSettings.microphone = rand() % 2;
+    uint8_t temp[5] = {
+        lampSettings.effectType,
+        lampSettings.brightness,
+        lampSettings.speed,
+        lampSettings.effectParameter,
+        lampSettings.microphone,
+    };
+    BLE::parametersCharacteristic->setValue(temp, 5);
+    BLE::parametersCharacteristic->notify();
+
+    lampSettings.onOff = !lampSettings.onOff;
+    uint8_t temp1[1]{
+        lampSettings.onOff,
+    };
+
+    BLE::onOffCharacteristic->setValue(temp1, 1);
+    BLE::onOffCharacteristic->notify();
+    // updateDisplay(deviceConnected, false);
+
+  } else if (btn and !switchBtn) {
+    switchBtn = true;
+  }
+
+  if (lampSettings.deviceConnected) {
     // Здесь можно обработать логику для подключенного клиента
     // oled.clear();
     // oled.home();

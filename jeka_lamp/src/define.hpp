@@ -1,0 +1,33 @@
+#ifndef __DEFINE_H__
+#define __DEFINE_H__
+
+
+// настройка BLE сурвера
+#define BLE_SERVER_NAME "JeKaLamp_REV1"
+
+// UUID сервисов и характеристик
+#define LAMP_STATE_SERVICE_UUID "1234"
+#define ON_OFF_CHARACTERISTIC_UUID "1234"
+#define PARAMETERS_CHARACTERISTIC_UUID "1235"
+
+
+#define SEGMENTS 1
+
+#define COLOR_ORDER GRB
+#define CURRENT_LIMIT 1000
+#define BRIGHTNESS 5
+
+#define LED_PIN 4     // пин ленты
+#define BTN_PIN 2     // пин кнопки
+#define SOUND_PIN 33  // пин звука
+
+#define WIDTH 16   // ширина матрицы
+#define HEIGHT 16  // высота матрицы
+#define NUM_LEDS WIDTH* HEIGHT
+#define P_SPEED 1
+
+// #define CLK 32
+// #define DT 33
+// #define SW 25
+
+#endif  // __DEFINE_H__

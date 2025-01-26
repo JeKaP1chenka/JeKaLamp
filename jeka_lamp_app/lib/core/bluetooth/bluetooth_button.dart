@@ -40,7 +40,7 @@ class BluetoothButton extends StatelessWidget {
       onPressed: () {
         context.read<BluetoothControlCubit>().turnOnEvent(context);
       },
-      color: const Color.fromARGB(255, 255, 56, 56),
+      color: const Color.fromARGB(255, 255, 60, 60),
       icon: Icon(Icons.bluetooth_disabled),
     );
   }
