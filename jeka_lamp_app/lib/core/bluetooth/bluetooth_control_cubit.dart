@@ -58,9 +58,9 @@ class BluetoothControlCubit extends Cubit<BluetoothControlState> {
       //! вызвать метод который проверит было ли в прошлом подключение и если было то сразу подключит
       emit(BluetoothControlNoConnectionState());
       if (device != null) {
-        _bluetoothConnect.device = device;
-        _bluetoothConnect.services = await device!.discoverServices();
-        _connectionStateController.add(BCConnectedState());
+        // _bluetoothConnect.device = device;
+        // _bluetoothConnect.services = await device!.discoverServices();
+        // _connectionStateController.add(BCConnectedState());
       } else {
         _connectionStateController.add(BCOffState());
         _bluetoothConnect.device = null;

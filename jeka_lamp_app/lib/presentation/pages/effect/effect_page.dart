@@ -29,7 +29,7 @@ class _EffectPageState extends State<EffectPage> {
             children: [
               Row(
                 mainAxisSize: MainAxisSize.max,
-                children: [dropdownEffectType()],
+                children: [dropdownEffectType(), switchMicrophone()],
               ),
               SizedBox(
                 height: 8,
@@ -39,6 +39,18 @@ class _EffectPageState extends State<EffectPage> {
           ),
         );
       },
+    );
+  }
+
+  switchMicrophone() {
+    return Row(
+      children: [
+        Icon(Icons.mic),
+        Switch(
+          value: _state.microphone,
+          onChanged: cubit.updateMicrophoneSwitch,
+        )
+      ],
     );
   }
 

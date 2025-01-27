@@ -65,7 +65,7 @@ class SendData {
             effectStateTemp.brightness.round(),
             effectStateTemp.speed.round(),
             effectStateTemp.parameter.round(),
-            effectStateTemp.microphone,
+            effectStateTemp.microphone ? 1 : 0,
           ],
           serviceUuidStr: s.uuid,
           characteristicUuidStr: ch.uuid,

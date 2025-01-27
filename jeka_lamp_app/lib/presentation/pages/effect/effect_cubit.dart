@@ -22,7 +22,6 @@ enum LightingEffect {
   final int effectCode;
 }
 
-
 class EffectCubit extends Cubit<EffectState> {
   EffectCubit()
       : super(const EffectState(
@@ -30,7 +29,7 @@ class EffectCubit extends Cubit<EffectState> {
           brightness: 0.0,
           speed: 0.0,
           parameter: 0.0,
-          microphone: 0,
+          microphone: false,
         ));
 
   void onValueReceived(List<int> values) {
@@ -39,7 +38,7 @@ class EffectCubit extends Cubit<EffectState> {
       brightness: values[1].toDouble(),
       speed: values[2].toDouble(),
       parameter: values[3].toDouble(),
-      microphone: values[4],
+      microphone: values[4] == 0 ? true : false,
     ));
   }
 
@@ -60,7 +59,7 @@ class EffectCubit extends Cubit<EffectState> {
   }
 
   void updateMicrophoneSwitch(bool value) {
-    emit(state.copyWith(microphone: value ? 1 : 0));
+    emit(state.copyWith(microphone: value));
   }
 
   @override

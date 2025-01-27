@@ -8,7 +8,7 @@ class EffectState extends Equatable {
   final double brightness;
   final double speed;
   final double parameter;
-  final int microphone;
+  final bool microphone;
 
   const EffectState({
     required this.effectType,
@@ -23,7 +23,7 @@ class EffectState extends Equatable {
     double? brightness,
     double? speed,
     double? parameter,
-    int? microphone,
+    bool? microphone,
   }) {
     return EffectState(
       effectType: effectType ?? this.effectType,
