@@ -6,6 +6,7 @@ import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect.dart';
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect_state.dart';
 import 'package:jeka_lamp_app/core/utils/bottom_navigation_element.dart';
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen_state.dart';
+import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_page.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_state.dart';
@@ -29,16 +30,21 @@ class HomeScreenCubit extends Cubit<HomeScreenState> {
         if (results is BCOffState) {
           emit(state.copyWith(uiBloc: true));
         } else if (results is BCConnectedState) {
-          di.s1<BluetoothConnect>().receiveData(
-                di.s1<EffectCubit>().onValueReceived,
-                serviceUuidStr: "1234",
-                characteristicUuidStr: "1235",
-              );
 
           di.s1<BluetoothConnect>().receiveData(
                 onValueReceived,
                 serviceUuidStr: "1234",
                 characteristicUuidStr: "1234",
+              );
+          di.s1<BluetoothConnect>().receiveData(
+                di.s1<EffectCubit>().onValueReceived,
+                serviceUuidStr: "1234",
+                characteristicUuidStr: "1235",
+              );
+          di.s1<BluetoothConnect>().receiveData(
+                di.s1<AlarmCubit>().onValueReceived,
+                serviceUuidStr: "1234",
+                characteristicUuidStr: "1236",
               );
 
           // di.s1<BluetoothConnect>().readData(

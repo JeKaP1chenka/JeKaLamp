@@ -26,6 +26,7 @@ class BluetoothManager {
       characteristics: {
         "on/off": BluetoothCharacteristic(uuid: "1234"),
         "parameters": BluetoothCharacteristic(uuid: "1235"),
+        "alarm": BluetoothCharacteristic(uuid: "1236"),
       },
     ),
     // "EffectState": BluetoothService(

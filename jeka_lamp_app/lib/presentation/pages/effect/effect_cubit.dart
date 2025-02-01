@@ -42,23 +42,23 @@ class EffectCubit extends Cubit<EffectState> {
     ));
   }
 
-  void updateEffectTypeDropdown(LightingEffect? value) {
+  Future<void> updateEffectTypeDropdown(LightingEffect? value) async {
     emit(state.copyWith(effectType: value?.effectCode));
   }
 
-  void updateBrightnessSlider(double value) {
+  Future<void> updateBrightnessSlider(double value) async {
     emit(state.copyWith(brightness: value));
   }
 
-  void updateSpeedSlider(double value) {
+  Future<void> updateSpeedSlider(double value) async {
     emit(state.copyWith(speed: value));
   }
 
-  void updateParameterSlider(double value) {
+  Future<void> updateParameterSlider(double value) async {
     emit(state.copyWith(parameter: value));
   }
 
-  void updateMicrophoneSwitch(bool value) {
+  Future<void> updateMicrophoneSwitch(bool value) async {
     emit(state.copyWith(microphone: value));
   }
 

@@ -9,7 +9,9 @@
 #define LAMP_STATE_SERVICE_UUID "1234"
 #define ON_OFF_CHARACTERISTIC_UUID "1234"
 #define PARAMETERS_CHARACTERISTIC_UUID "1235"
+#define ALARM_CHARACTERISTIC_UUID "1236"
 
+#define SAVE_TO_FLASH_DELAY 30000
 
 #define SEGMENTS 1
 
@@ -26,8 +28,8 @@
 #define NUM_LEDS WIDTH* HEIGHT
 #define P_SPEED 1
 
-// #define CLK 32
-// #define DT 33
-// #define SW 25
+#define SERIAL_DEBUG 1
+#define DISPLAY_DEBUG 1
+
 
 #endif  // __DEFINE_H__

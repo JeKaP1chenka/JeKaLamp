@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  built_collection: ^5.1.1
 
 dev_dependencies:
   flutter_test:
@@ -30,6 +31,8 @@ dev_dependencies:
 
   # dropDownButton2
   dropdown_button2: ^2.3.9
+  # слайдер карусель
+  wheel_slider: ^1.2.2
 
 flutter:
   uses-material-design: true

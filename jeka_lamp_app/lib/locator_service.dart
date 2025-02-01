@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect.dart';
 import 'package:jeka_lamp_app/core/bluetooth/bluetooth_helper.dart';
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen_cubit.dart';
+import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
 import 'package:jeka_lamp_app/presentation/send_data.dart';
 
@@ -21,10 +22,12 @@ Future<void> init() async {
   );
 
   s1.registerLazySingleton(() => EffectCubit());
+  s1.registerLazySingleton(() => AlarmCubit());
 
   s1.registerLazySingleton(
     () => SendData(
       effectCubit: s1(),
+      alarmCubit: s1(),
       bluetoothManager: s1(),
     ),
   );

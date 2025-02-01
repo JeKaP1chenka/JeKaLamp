@@ -1,69 +1,44 @@
+#include <bitset>
 #include <main.hpp>
-
 // Глобальные переменные
 
 // uint8_t myData[2] = {0, 0};
 // int idx = 0;
 
-GyverOLED<SSD1306_128x64> oled;
+bool switchBtn = true;
 
-LampSettings lampSettings;
-
-
-void updateDisplay(bool isConnect) {
-  oled.clear();
-
-  oled.setCursor(0, 4);
-  oled.printf("%d", lampSettings.onOff);
-  oled.setCursor(0, 5);
-  oled.printf("%d  %d  %d  %d  %d  ", lampSettings.effectType,
-              lampSettings.brightness, lampSettings.speed,
-              lampSettings.effectParameter, lampSettings.microphone);
-
-  oled.setCursor(0, 0);
-  if (!isConnect) {
-    oled.print("отключено");
-  } else {
-    oled.print("подключено");
-  }
-
-  oled.update();
-}
-
-
+void btnUpdate();
 
 void setup() {
+  loadData();
   Serial.begin(115200);
 
   BLE::initBLE(&lampSettings);
-  // enc1.setBtnLevel(LOW);
-  // enc1.setClickTimeout(500);
-  // enc1.setDebTimeout(50);
-  // enc1.setHoldTimeout(600);
-  // enc1.setStepTimeout(200);
-  // enc1.setEncReverse(0);
-  // // EB_STEP4_LOW, EB_STEP4_HIGH, EB_STEP2, EB_STEP1
-  // enc1.setEncType(EB_STEP4_HIGH);
-  // enc1.setFastTimeout(30);
-  // // enc1.setType(TYPE2);
 
   pinMode(17, INPUT_PULLUP);
 
-  oled.init(21, 22);
-  oled.clear();
-  oled.home();
-  oled.autoPrintln(true);
-  oled.setScale(1);
-  oled.print("");
-  oled.update();
+#if (DISPLAY_DEBUG == 1)
+  initDisplay();
+#endif
 }
 
-bool switchBtn = true;
 void loop() {
   // Основной цикл
+  saveData();
+  btnUpdate();
+  //! effectTick();
+  //! timeTick();
+#if (DISPLAY_DEBUG == 1)
+  updateDisplay();
+#endif
+
+  if (BLE::deviceConnected) {
+  }
+}
+
+void btnUpdate() {
   auto btn = digitalRead(17);
   // Serial.printf("%d %d\n", switchBtn, btn);
-  updateDisplay(lampSettings.deviceConnected);
   if (!btn and switchBtn) {
     switchBtn = false;
 
@@ -73,10 +48,8 @@ void loop() {
     lampSettings.effectParameter = rand() % 256;
     lampSettings.microphone = rand() % 2;
     uint8_t temp[5] = {
-        lampSettings.effectType,
-        lampSettings.brightness,
-        lampSettings.speed,
-        lampSettings.effectParameter,
+        lampSettings.effectType, lampSettings.brightness,
+        lampSettings.speed,      lampSettings.effectParameter,
         lampSettings.microphone,
     };
     BLE::parametersCharacteristic->setValue(temp, 5);
@@ -89,20 +62,28 @@ void loop() {
 
     BLE::onOffCharacteristic->setValue(temp1, 1);
     BLE::onOffCharacteristic->notify();
-    // updateDisplay(deviceConnected, false);
 
+    lampSettings.alarmState = rand() % 256;
+    lampSettings.timeBeforeAlarm = (rand() % 12) * 5 + 5;
+    lampSettings.timeAfterAlarm = (rand() % 12) * 5 + 5;
+    for (int i = 0; i < 7; ++i) {
+      lampSettings.timeOfDays[i * 2] = rand() % 24;
+      lampSettings.timeOfDays[i * 2 + 1] = rand() % 60;
+    }
+
+    uint8_t temp2[17] = {
+        lampSettings.alarmState,
+        lampSettings.timeBeforeAlarm,
+        lampSettings.timeAfterAlarm,
+    };
+    for (int i = 3; i < 17; ++i) {
+      temp2[i] = lampSettings.timeOfDays[i - 3];
+    }
+
+    BLE::alarmCharacteristic->setValue(temp2, 17);
+    BLE::alarmCharacteristic->notify();
+    updateData();
   } else if (btn and !switchBtn) {
     switchBtn = true;
-  }
-
-  if (lampSettings.deviceConnected) {
-    // Здесь можно обработать логику для подключенного клиента
-    // oled.clear();
-    // oled.home();
-    // oled.autoPrintln(true);
-    // oled.setScale(1);
-    // // Serial.print("clear");
-    // oled.print("");
-    // oled.update();
   }
 }

@@ -9,9 +9,8 @@ import 'package:jeka_lamp_app/core/bluetooth/bluetooth_control_cubit.dart';
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen_cubit.dart';
+import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
-
-
 
 void main() async {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
@@ -27,13 +26,10 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<EffectCubit>(
-          create: (context) => di.s1<EffectCubit>(),
-        ),
+        BlocProvider<EffectCubit>(create: (context) => di.s1<EffectCubit>()),
+        BlocProvider<AlarmCubit>(create: (context) => di.s1<AlarmCubit>()),
         BlocProvider<HomeScreenCubit>(
-          create: (context) => di.s1<HomeScreenCubit>(),
-        ),
-
+            create: (context) => di.s1<HomeScreenCubit>()),
       ],
       child: MaterialApp(
         theme: AppTheme.lightTheme,
@@ -44,4 +40,3 @@ class App extends StatelessWidget {
     );
   }
 }
-

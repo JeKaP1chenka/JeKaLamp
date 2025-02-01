@@ -4,6 +4,10 @@
 #include <stdint.h>
 
 #include <Arduino.h>
+#include <Preferences.h>
+Preferences preferences;
+// #include <EEPROM.h>
+// #include <esp_attr.h>
 
 #include <BLE2902.h>
 #include <BLEDevice.h>
@@ -17,8 +21,11 @@
 #include <define.hpp>
 
 #include <LampSettings.hpp>
+#include <data.hpp>
 #include <BLE.hpp>
-
-
+#include <effects/effect.hpp>
+#if (DISPLAY_DEBUG == 1)
+#include <display.hpp>
+#endif
 
 #endif  // __INCLUDE_H__

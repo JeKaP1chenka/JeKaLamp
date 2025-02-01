@@ -3,6 +3,7 @@ import 'package:jeka_lamp_app/core/bluetooth/bluetooth_connect.dart';
 import 'package:jeka_lamp_app/core/utils/bottom_navigation_element.dart';
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen_cubit.dart';
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen_state.dart';
+import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_page.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_page.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +17,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool autoSendData = false;
+  var _selectedIndex = 0;
+
   final WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
     <WidgetStatesConstraint, Icon>{
       WidgetState.selected: Icon(Icons.check),
@@ -30,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
       label: "Effect",
     ),
     BottomNavigationElement(
-      widget: Center(child: Text("alarm")),
+      widget: AlarmPage(),
       icon: Icon(Icons.alarm),
       label: "Alarm",
     ),
@@ -40,8 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
       label: "Network",
     ),
   ];
-
-  var _selectedIndex = 0;
 
   void _onNavigationItemTapped(int index) {
     setState(() {
@@ -101,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar buildAppBar() {
     return AppBar(
+      backgroundColor: Colors.grey[850],
       title: Text("JeKaLampApp"),
       actions: [
         Row(

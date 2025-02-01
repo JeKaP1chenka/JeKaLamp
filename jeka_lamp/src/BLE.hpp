@@ -5,25 +5,24 @@
 
 namespace BLE {
 
+bool deviceConnected = false;
 BLEServer *pServer;
 BLEService *pService;
 BLECharacteristic *onOffCharacteristic;
 BLECharacteristic *parametersCharacteristic;
+BLECharacteristic *alarmCharacteristic;
 
 namespace Callbacks {
 
 class ServerCallbacks : public BLEServerCallbacks {
-  LampSettings *_lampSettings;
-
  public:
-  ServerCallbacks(LampSettings *lampSettings) { _lampSettings = lampSettings; };
   void onConnect(BLEServer *pServer) override {
-    _lampSettings->deviceConnected = true;
+    deviceConnected = true;
     Serial.println("Устройство подключено.");
     // updateDisplay(true, false);
   };
   void onDisconnect(BLEServer *pServer) override {
-    _lampSettings->deviceConnected = false;
+    deviceConnected = false;
     Serial.println("Устройство отключено.");
     Serial.println("Рекламирование BLE перезапущено.");
     pServer->getAdvertising()->start();
@@ -44,17 +43,15 @@ class LampOnOffCallbacks : public BLECharacteristicCallbacks {
 
     if (length == 1) {
       _lampSettings->onOff = data[0];
-      // updateDisplay(true, false);
+      updateData();
     } else {
       Serial.printf(
-          "LampState accepts a 1 uint8_t parameteк, and it was passed %d",
+          "LampState accepts a 1 uint8_t parameteк, and it was passed %d\n",
           length);
     }
   };
   void onRead(BLECharacteristic *pCharacteristic) override {
-    uint8_t temp1[1]{
-        _lampSettings->onOff,
-    };
+    uint8_t temp1[1]{_lampSettings->onOff};
 
     pCharacteristic->setValue(temp1, 1);
   };
@@ -72,44 +69,70 @@ class EffectParametersCallbacks : public BLECharacteristicCallbacks {
     auto length = pCharacteristic->getLength();
 
     if (length == 5) {
-      /**
-       * 0 - effectType
-       * 1 - brightness (яркость)
-       * 2 - speed
-       * 3 - effectParameter
-       */
       _lampSettings->effectType = data[0];
       _lampSettings->brightness = data[1];
       _lampSettings->speed = data[2];
       _lampSettings->effectParameter = data[3];
       _lampSettings->microphone = data[4];
-
-      // updateDisplay(true, false);
+      updateData();
     } else {
       Serial.printf(
-          "EffectState accepts 5 uint8_t parameters, and it has been passed %d",
+          "EffectState accepts 5 uint8_t parameters, and it has been passed "
+          "%d\n",
           length);
     }
   };
   void onRead(BLECharacteristic *pCharacteristic) override {
-    uint8_t temp[5] = {
-        _lampSettings->effectType,
-        _lampSettings->brightness,
-        _lampSettings->speed,
-        _lampSettings->effectParameter,
-        _lampSettings->microphone,
-    };
+    uint8_t temp[5] = {_lampSettings->effectType, _lampSettings->brightness,
+                       _lampSettings->speed, _lampSettings->effectParameter,
+                       _lampSettings->microphone};
     pCharacteristic->setValue(temp, 5);
   };
 };
 
+class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
+  LampSettings *_lampSettings;
+
+ public:
+  AlarmParametersCallbacks(LampSettings *lampSettings) {
+    _lampSettings = lampSettings;
+  };
+  void onWrite(BLECharacteristic *pCharacteristic) override {
+    uint8_t *data = pCharacteristic->getData();
+    auto length = pCharacteristic->getLength();
+
+    if (length == 17) {
+      _lampSettings->alarmState = data[0];
+      _lampSettings->timeBeforeAlarm = data[1];
+      _lampSettings->timeAfterAlarm = data[2];
+      for (int i = 3; i < 17; ++i) {
+        _lampSettings->timeOfDays[i - 3] = data[i];
+      }
+      updateData();
+    } else {
+      Serial.printf(
+          "AlarmState accepts 17 uint8_t parameters, and it has been "
+          "passed%d\n",
+          length);
+    }
+  };
+  void onRead(BLECharacteristic *pCharacteristic) override {
+    uint8_t temp[17] = {_lampSettings->alarmState,
+                        _lampSettings->timeBeforeAlarm,
+                        _lampSettings->timeAfterAlarm};
+    for (int i = 3; i < 17; ++i) {
+      temp[i] = _lampSettings->timeOfDays[i - 3];
+    }
+    pCharacteristic->setValue(temp, 17);
+  };
+};
 }  // namespace Callbacks
 void initBLE(LampSettings *lampSettings) {
   Serial.println("Запуск BLE-сервера...");
   BLEDevice::init(BLE_SERVER_NAME);
 
   pServer = BLEDevice::createServer();
-  pServer->setCallbacks(new Callbacks::ServerCallbacks(lampSettings));
+  pServer->setCallbacks(new Callbacks::ServerCallbacks());
 
   pService = pServer->createService(LAMP_STATE_SERVICE_UUID);
 
@@ -128,6 +151,14 @@ void initBLE(LampSettings *lampSettings) {
   parametersCharacteristic->setCallbacks(
       new Callbacks::EffectParametersCallbacks(lampSettings));
   parametersCharacteristic->addDescriptor(new BLE2902());
+
+  alarmCharacteristic = pService->createCharacteristic(
+      ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                                     BLECharacteristic::PROPERTY_WRITE |
+                                     BLECharacteristic::PROPERTY_NOTIFY);
+  alarmCharacteristic->setCallbacks(
+      new Callbacks::AlarmParametersCallbacks(lampSettings));
+  alarmCharacteristic->addDescriptor(new BLE2902());
 
   pService->start();
 
