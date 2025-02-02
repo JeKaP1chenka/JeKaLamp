@@ -21,6 +21,7 @@ Preferences preferences;
 #include <define.hpp>
 
 #include <LampSettings.hpp>
+#include <ledMatrix.hpp>
 #include <data.hpp>
 #include <BLE.hpp>
 #include <effects/effect.hpp>

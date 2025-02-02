@@ -3,6 +3,31 @@
 
 #include <include.h>
 
+void debugData() {
+  Serial.printf("---------------------------\n");
+  Serial.printf("onOff:\t%d\n", lampSettings.onOff);
+  Serial.printf("effectType:\t%d\n", lampSettings.effectType);
+  Serial.printf("brightness:\t%d\n", lampSettings.brightness);
+  Serial.printf("speed:\t%d\n", lampSettings.speed);
+  Serial.printf("effectParameter:\t%d\n", lampSettings.effectParameter);
+  Serial.printf("microphone:\t%d\n", lampSettings.microphone);
+  Serial.printf("\n");
+  Serial.printf("alarmState:\t%d\n", lampSettings.alarmState);
+  Serial.printf("timeBeforeAlarm:\t%d\n", lampSettings.timeBeforeAlarm);
+  Serial.printf("timeAfterAlarm:\t%d\n", lampSettings.timeAfterAlarm);
+  for (int i = 0; i < 7; i++) {
+    Serial.printf("day %d:\t%d:%d\n", i, lampSettings.timeOfDays[i * 2],
+                  lampSettings.timeOfDays[i * 2 + 1]);
+  }
+  Serial.printf("\n");
+  Serial.printf("wifiName:\t%s\n", lampSettings.wifiName);
+  Serial.printf("wifiPassword:\t%s\n", lampSettings.wifiPassword);
+
+  Serial.printf("---------------------------\n");
+}
+
+#if (SAVE_DATA == 1)
+
 volatile bool savePending = false;
 unsigned long lastUpdateTime = 0;
 
@@ -29,33 +54,18 @@ void saveData() {
   Serial.println("Данные сохранены!");
 }
 
-void debugData() {
-  Serial.printf("---------------------------\n");
-  Serial.printf("onOff:\t%d\n", lampSettings.onOff);
-  Serial.printf("effectType:\t%d\n", lampSettings.effectType);
-  Serial.printf("brightness:\t%d\n", lampSettings.brightness);
-  Serial.printf("speed:\t%d\n", lampSettings.speed);
-  Serial.printf("effectParameter:\t%d\n", lampSettings.effectParameter);
-  Serial.printf("microphone:\t%d\n", lampSettings.microphone);
-  Serial.printf("\n");
-  Serial.printf("alarmState:\t%d\n", lampSettings.alarmState);
-  Serial.printf("timeBeforeAlarm:\t%d\n", lampSettings.timeBeforeAlarm);
-  Serial.printf("timeAfterAlarm:\t%d\n", lampSettings.timeAfterAlarm);
-  for (int i = 0; i < 7; i++) {
-    Serial.printf("day %d:\t%d:%d\n", i, lampSettings.timeOfDays[i * 2],
-                  lampSettings.timeOfDays[i * 2 + 1]);
-  }
-  Serial.printf("\n");
-  Serial.printf("wifiName:\t%s\n", lampSettings.wifiName);
-  Serial.printf("wifiPassword:\t%s\n", lampSettings.wifiPassword);
-
-  Serial.printf("---------------------------\n");
-}
 
 void updateData() {
   lastUpdateTime = millis();
   savePending = true;
   Serial.println("Данные обновлены, сохранение отложено...");
+  debugData();
+}
+#endif
+
+void loadData(){}
+void saveData(){}
+void updateData(){
   debugData();
 }
 

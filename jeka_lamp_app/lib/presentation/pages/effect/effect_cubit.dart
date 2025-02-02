@@ -6,11 +6,11 @@ import 'package:jeka_lamp_app/presentation/pages/effect/effect_state.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
 
 enum LightingEffect {
-  rainbow('Rainbow', 1),
+  fire('Fire', 1),
   pulse('Pulse', 2),
   strobe('Strobe', 3),
   wave('Wave', 4),
-  fire('Fire', 5),
+  rainbow('Rainbow', 5),
   staticColor('Static Color', 6),
   s7('Static Color', 7),
   s8('Static Color', 8),

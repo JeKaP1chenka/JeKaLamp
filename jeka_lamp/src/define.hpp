@@ -16,7 +16,7 @@
 #define SEGMENTS 1
 
 #define COLOR_ORDER GRB
-#define CURRENT_LIMIT 1000
+#define CURRENT_LIMIT 500
 #define BRIGHTNESS 5
 
 #define LED_PIN 4     // пин ленты
@@ -28,8 +28,13 @@
 #define NUM_LEDS WIDTH* HEIGHT
 #define P_SPEED 1
 
+#define CONNECTION_ANGLE 3
+#define STRIP_DIRECTION 1
+#define MATRIX_TYPE 0
+
 #define SERIAL_DEBUG 1
 #define DISPLAY_DEBUG 1
+#define SAVE_DATA 0
 
 
 #endif  // __DEFINE_H__

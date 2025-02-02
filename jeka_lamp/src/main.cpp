@@ -15,6 +15,11 @@ void setup() {
 
   BLE::initBLE(&lampSettings);
 
+  FastLED.addLeds<WS2812B, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)/*.setCorrection( TypicalLEDStrip )*/;
+  FastLED.setBrightness(250);
+  if (CURRENT_LIMIT > 0) FastLED.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
+  FastLED.show();
+
   pinMode(17, INPUT_PULLUP);
 
 #if (DISPLAY_DEBUG == 1)
@@ -26,7 +31,7 @@ void loop() {
   // Основной цикл
   saveData();
   btnUpdate();
-  //! effectTick();
+  effectTick();
   //! timeTick();
 #if (DISPLAY_DEBUG == 1)
   updateDisplay();
