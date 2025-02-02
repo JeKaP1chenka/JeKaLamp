@@ -6,16 +6,18 @@ import 'package:jeka_lamp_app/presentation/pages/effect/effect_state.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
 
 enum LightingEffect {
-  fire('Fire', 1),
-  pulse('Pulse', 2),
-  strobe('Strobe', 3),
-  wave('Wave', 4),
-  rainbow('Rainbow', 5),
-  staticColor('Static Color', 6),
-  s7('Static Color', 7),
-  s8('Static Color', 8),
-  s9('Static Color', 9),
-  s10('Static Color', 10);
+  staticColor('Static Color', 1),
+  dynamicColor("Dynamic Color", 2),
+  fire('Fire', 3),
+  pulse('Pulse', 4),
+  
+  wave('Wave', 5),
+  rainbow('Rainbow', 6),
+  strobe('Strobe', 7),
+  s7('Static Color', 8),
+  s8('Static Color', 9),
+  s9('Static Color', 10),
+  s10('Static Color', 11);
 
   const LightingEffect(this.label, this.effectCode);
   final String label;

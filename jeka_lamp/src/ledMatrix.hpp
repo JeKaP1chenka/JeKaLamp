@@ -7,6 +7,8 @@ CRGB leds[NUM_LEDS];
 
 uint16_t getPixelNumber(int8_t x, int8_t y);
 
+
+
 void fillAll(CRGB color) {
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i] = color;
