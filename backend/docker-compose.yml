@@ -6,7 +6,7 @@ services:
       context: ./sql
       dockerfile: Dockerfile
     environment:
-      POSTGRES_PASSWORD: sql@sql
+      POSTGRES_PASSWORD: sqlMaxSql
     ports:
       - "5432:5432"
     container_name: postgres_instance

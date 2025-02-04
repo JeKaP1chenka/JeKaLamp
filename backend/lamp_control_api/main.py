@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 app = FastAPI()
 
-DATABASE_URL = "postgresql://postgres:sql@postgres:5432/lampdb"
+DATABASE_URL = "postgresql://postgres:sqlMaxSql@postgres:5432/lampdb"
 
 # Для упрощения создадим подключение к базе данных
 async def get_db_pool():
@@ -33,55 +33,73 @@ async def register_lamp(lamp_name: str):
 async def check_status(lamp_name: str):
     pool = await get_db_pool()
     async with pool.acquire() as connection:
-        # Проверяем, существует ли связь с целевой лампой
+        # Получаем id лампы по имени
         lamp_result = await connection.fetchrow(
             "SELECT id FROM lamps WHERE lamp_name = $1", lamp_name
         )
         if lamp_result:
             lamp_id = lamp_result['id']
-            # Проверяем, есть ли связь с другими лампами
+
+            # Проверяем, есть ли связь с другой лампой
             connection_result = await connection.fetchrow(
-                "SELECT id FROM lamp_connections WHERE lamp_id = $1", lamp_id
+                "SELECT id FROM lamp_connections WHERE target_lamp_id = $1", lamp_id
             )
+
             if connection_result:
+                # Проверяем наличие сообщений для данной лампы
+                message_result = await connection.fetchrow(
+                    "SELECT id FROM messages WHERE lamp_connection_id = $1 AND is_read = FALSE",
+                    connection_result['id']
+                )
+
+                if message_result:
+                    await connection.execute(
+                        "UPDATE messages SET is_read = TRUE WHERE id = $1", message_result['id']
+                    )
+                    # Если есть сообщение, которое было отправлено с другой лампы
+                    return True
+                    
+
                 # Лампа активна, обновляем время последней проверки
                 await connection.execute(
                     "UPDATE lamps SET last_check = CURRENT_TIMESTAMP WHERE id = $1", lamp_id
                 )
-                return {"message": "Lamp is active"}
+                return False    
+
             else:
                 raise HTTPException(status_code=404, detail="No connection found for this lamp")
         else:
             raise HTTPException(status_code=404, detail="Lamp not found")
 
-@app.post("/send_signal/")
-async def send_signal(lamp_data: LampData):
+
+@app.post("/send_signal/{lamp_name}")
+async def send_signal(lamp_name: str):
     pool = await get_db_pool()
     async with pool.acquire() as connection:
         # Находим id лампы и целевой лампы по имени
         lamp_result = await connection.fetchrow(
-            "SELECT id FROM lamps WHERE lamp_name = $1", lamp_data.lamp_name
+            "SELECT id FROM lamps WHERE lamp_name = $1", lamp_name
         )
-        target_lamp_result = await connection.fetchrow(
-            "SELECT id FROM lamps WHERE lamp_name = $1", lamp_data.target_lamp_name
-        )
+        # target_lamp_result = await connection.fetchrow(
+        #     "SELECT id FROM lamps WHERE lamp_name = $1", lamp_data.target_lamp_name
+        # )
 
-        if lamp_result and target_lamp_result:
+        if lamp_result:
             lamp_id = lamp_result['id']
-            target_lamp_id = target_lamp_result['id']
+            # target_lamp_id = target_lamp_result['id']
 
             # Проверяем, есть ли связь между лампами
             connection_result = await connection.fetchrow(
-                "SELECT id FROM lamp_connections WHERE lamp_id = $1 AND target_lamp_id = $2",
-                lamp_id, target_lamp_id
+                "SELECT id FROM lamp_connections WHERE lamp_id = $1",
+                lamp_id
             )
 
             if connection_result:
                 connection_id = connection_result['id']
                 # Сигнал активен, добавляем сообщение
                 await connection.execute(
-                    "INSERT INTO messages (lamp_connection_id, is_from_lamp_to_target, message_content) VALUES ($1, $2, $3)",
-                    connection_id, True, "Signal sent from lamp to target"
+                    "INSERT INTO messages (lamp_connection_id, is_read, message_content) VALUES ($1, $2, $3)",
+                    connection_id, False, "Signal sent from lamp to target"
                 )
                 return {"message": "Signal sent successfully"}
             else:

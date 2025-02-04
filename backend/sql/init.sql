@@ -23,14 +23,14 @@ CREATE TABLE IF NOT EXISTS lamp_connections (
     target_lamp_id INT,
     FOREIGN KEY (lamp_id) REFERENCES lamps(id),
     FOREIGN KEY (target_lamp_id) REFERENCES lamps(id),
-    UNIQUE(lamp_id, target_lamp_id)
+    UNIQUE(lamp_id)
 );
 
 -- Таблица для сообщений о сигнале между лампами с полем для направления сигнала
 CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,
     lamp_connection_id INT,
-    is_from_lamp_to_target BOOLEAN, -- TRUE, если сигнал от лампы к цели, FALSE наоборот
+    is_read BOOLEAN,
     message_content TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lamp_connection_id) REFERENCES lamp_connections(id)
