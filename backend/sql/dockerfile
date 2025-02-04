@@ -1,0 +1,9 @@
+FROM postgres:latest
+
+COPY init.sql /docker-entrypoint-initdb.d/
+# COPY dump.sql /home/
+
+RUN apt-get update && apt-get install -y curl
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD curl -f http://localhost:5432 || exit 1

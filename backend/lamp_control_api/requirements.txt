@@ -1,0 +1,9 @@
+# fastapi
+# psycopg2
+# uvicorn
+# httpx
+# python-multipart
+
+fastapi
+uvicorn
+asyncpg

@@ -1,0 +1,15 @@
+FROM python:latest
+
+WORKDIR /app/
+COPY . /app/
+
+RUN apt-get update && apt-get install -y libssl-dev
+
+RUN pip install --upgrade pip
+RUN pip install -r /app/requirements.txt
+
+
+CMD ["bash", "/app/wait-for-it.sh", "postgres:5432", "--", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "9999"]
+
+
+

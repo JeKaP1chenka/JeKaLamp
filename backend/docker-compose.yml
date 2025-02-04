@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  postgres:
+    build:
+      context: ./sql
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_PASSWORD: sql@sql
+    ports:
+      - "5432:5432"
+    container_name: postgres_instance
+
+  lamp_control_api:
+    build:
+      context: ./lamp_control_api
+      dockerfile: Dockerfile
+    volumes:
+      - ./lamp_control_api:/app
+    ports:
+      - "9999:9999"
+    container_name: lamp_control_api_instance
+    depends_on:
+      - postgres
+
+  
