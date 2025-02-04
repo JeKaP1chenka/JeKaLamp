@@ -110,6 +110,9 @@ class VolAnalyzer {
       }
       return false;
     }
+    bool getPP(){
+      return _pulse;
+    }
 
   private:
     int _pin;

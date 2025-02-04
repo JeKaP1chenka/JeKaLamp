@@ -130,5 +130,9 @@ class SendData {
     }
   }
 
+  void sendTime(){
+    
+  }
+
 
 }

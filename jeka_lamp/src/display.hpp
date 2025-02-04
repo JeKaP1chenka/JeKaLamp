@@ -6,6 +6,9 @@
 GyverOLED<SSD1306_128x64> oled;
 
 void updateDisplay() {
+  static timerMillis tmr(500, true);
+  if (!tmr.isReady()) return;
+
   oled.clear();
 
   oled.setCursor(0, 1);

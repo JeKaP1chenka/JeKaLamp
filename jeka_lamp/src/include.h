@@ -15,11 +15,13 @@ Preferences preferences;
 #include <BLEUtils.h>
 
 #include <FastLED.h>
-#include "vol/VolAnalyzer.h"
 #include <GyverOLED.h>
 
 #include <define.hpp>
 
+#include "vol/VolAnalyzer.h"
+#include "utils/timerMillis.h"
+#include "utils/Time.h"
 #include <LampSettings.hpp>
 #include <sound.hpp>
 #include <ledMatrix.hpp>

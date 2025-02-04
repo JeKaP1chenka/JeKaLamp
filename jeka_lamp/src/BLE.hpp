@@ -11,6 +11,8 @@ BLEService *pService;
 BLECharacteristic *onOffCharacteristic;
 BLECharacteristic *parametersCharacteristic;
 BLECharacteristic *alarmCharacteristic;
+BLECharacteristic *NetworkCharacteristic;
+BLECharacteristic *TimeCharacteristic;
 
 namespace Callbacks {
 
@@ -18,6 +20,7 @@ class ServerCallbacks : public BLEServerCallbacks {
  public:
   void onConnect(BLEServer *pServer) override {
     deviceConnected = true;
+
     Serial.println("Устройство подключено.");
     // updateDisplay(true, false);
   };
@@ -96,7 +99,7 @@ class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
  public:
   AlarmParametersCallbacks(LampSettings *lampSettings) {
     _lampSettings = lampSettings;
-  };
+  }
   void onWrite(BLECharacteristic *pCharacteristic) override {
     uint8_t *data = pCharacteristic->getData();
     auto length = pCharacteristic->getLength();
@@ -115,7 +118,7 @@ class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
           "passed%d\n",
           length);
     }
-  };
+  }
   void onRead(BLECharacteristic *pCharacteristic) override {
     uint8_t temp[17] = {_lampSettings->alarmState,
                         _lampSettings->timeBeforeAlarm,
@@ -124,8 +127,56 @@ class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
       temp[i] = _lampSettings->timeOfDays[i - 3];
     }
     pCharacteristic->setValue(temp, 17);
-  };
+  }
 };
+
+class NetworkParametersCallbacks : public BLECharacteristicCallbacks {
+
+ public:
+  void onWrite(BLECharacteristic *pCharacteristic) override {
+    uint8_t *data = pCharacteristic->getData();
+    auto length = pCharacteristic->getLength();
+
+    if (length == 4) {
+
+    } else {
+      Serial.printf(
+          "NetworkState accepts 17 uint8_t parameters, and it has been "
+          "passed%d\n",
+          length);
+    }
+  }
+  // void onRead(BLECharacteristic *pCharacteristic) override {
+  // }
+};
+
+
+class TimeParametersCallbacks : public BLECharacteristicCallbacks {
+
+ public:
+  void onWrite(BLECharacteristic *pCharacteristic) override {
+    uint8_t *data = pCharacteristic->getData();
+    auto length = pCharacteristic->getLength();
+
+    if (length == 4) {
+      now.sec = ;
+      now.min = ;
+      now.hour = ;
+      now.day = ;
+      now.setMs(0)
+    } else {
+      Serial.printf(
+          "TimeState accepts 17 uint8_t parameters, and it has been "
+          "passed%d\n",
+          length);
+    }
+  }
+  // void onRead(BLECharacteristic *pCharacteristic) override {
+  // }
+};
+
+
+
 }  // namespace Callbacks
 void initBLE(LampSettings *lampSettings) {
   Serial.println("Запуск BLE-сервера...");
@@ -159,6 +210,23 @@ void initBLE(LampSettings *lampSettings) {
   alarmCharacteristic->setCallbacks(
       new Callbacks::AlarmParametersCallbacks(lampSettings));
   alarmCharacteristic->addDescriptor(new BLE2902());
+
+  NetworkCharacteristic = pService->createCharacteristic(
+      ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                                     BLECharacteristic::PROPERTY_WRITE |
+                                     BLECharacteristic::PROPERTY_NOTIFY);
+  NetworkCharacteristic->setCallbacks(
+      new Callbacks::NetworkParametersCallbacks());
+  NetworkCharacteristic->addDescriptor(new BLE2902());
+
+  TimeCharacteristic = pService->createCharacteristic(
+      ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                                     BLECharacteristic::PROPERTY_WRITE |
+                                     BLECharacteristic::PROPERTY_NOTIFY);
+  TimeCharacteristic->setCallbacks(
+      new Callbacks::TimeParametersCallbacks());
+  TimeCharacteristic->addDescriptor(new BLE2902());
+
 
   pService->start();
 

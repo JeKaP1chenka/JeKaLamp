@@ -13,6 +13,9 @@ const int8_t effectsArraySize = 4;
 void (*effectsArray[effectsArraySize])(byte, int) = {staticColorTick, dynamicColorTick, fireTick, pulseTick};
 
 void effectTick() {
+  static timerMillis tmr(30, true);
+  if (!tmr.isReady()) return;
+  Serial.printf("$%d %d %d %d %d %d;", sound.getVol(), sound.getMin(), sound.getMax(), sound.getRaw(), sound.getRawMax(), ((int16_t)sound.getPP() * 500));
   byte scale = lampSettings.effectParameter;
   int len = 16;
   if (lampSettings.microphone){

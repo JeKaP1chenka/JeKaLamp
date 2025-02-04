@@ -5,8 +5,8 @@
 // uint8_t myData[2] = {0, 0};
 // int idx = 0;
 
-
 bool switchBtn = true;
+Time now;
 void btnUpdate();
 
 void setup() {
@@ -19,9 +19,11 @@ void setup() {
   BLE::initBLE(&lampSettings);
 
   // led matrix init
-  FastLED.addLeds<WS2812B, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)/*.setCorrection( TypicalLEDStrip )*/;
+  FastLED.addLeds<WS2812B, LED_PIN, COLOR_ORDER>(
+      leds, NUM_LEDS) /*.setCorrection( TypicalLEDStrip )*/;
   FastLED.setBrightness(250);
-  if (CURRENT_LIMIT > 0) FastLED.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
+  if (CURRENT_LIMIT > 0)
+    FastLED.setMaxPowerInVoltsAndMilliamps(5, CURRENT_LIMIT);
   FastLED.show();
 
   soundSetup();
@@ -36,14 +38,8 @@ void setup() {
 void loop() {
   // Serial.print(1);
   // Основной цикл
-  // sound.tick();
-  yield();
   saveData();
-  // sound.tick();
-  yield();
   btnUpdate();
-  // sound.tick();
-  yield();
   effectTick();
   sound.tick();
   yield();
@@ -57,6 +53,8 @@ void loop() {
 }
 
 void btnUpdate() {
+  static timerMillis tmr(100, true);
+  if (!tmr.isReady()) return;
   auto btn = digitalRead(17);
   // Serial.printf("%d %d\n", switchBtn, btn);
   if (!btn and switchBtn) {
