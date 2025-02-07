@@ -11,10 +11,13 @@ void btnUpdate();
 
 void setup() {
   loadData();
+  wifiInit();
 
   // Serial init
-  Serial.begin(115200);
+#if (SERIAL_LOG == 1)
 
+  Serial.begin(115200);
+#endif
   // BLE init
   BLE::initBLE(&lampSettings);
 

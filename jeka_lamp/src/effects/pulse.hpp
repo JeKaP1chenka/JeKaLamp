@@ -4,14 +4,17 @@
 #include "../include.h"
 
 void pulseTick(byte scale, int len) {
+#if (SERIAL_LOG == 1)
+
   Serial.print(2);
+#endif
 
   static uint8_t g = 3;
   static byte curColor = 0;
 
   for (int i = 0; i < WIDTH; i++) {
-    for (int j = HEIGHT - 1; j >= 1 ; j--) {
-      leds[getPixelNumber(i, j)] = leds[getPixelNumber(i, j-1)];
+    for (int j = HEIGHT - 1; j >= 1; j--) {
+      leds[getPixelNumber(i, j)] = leds[getPixelNumber(i, j - 1)];
     }
   }
 

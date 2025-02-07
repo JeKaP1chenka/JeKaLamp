@@ -13,12 +13,14 @@ import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_state.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_state.dart';
+import 'package:jeka_lamp_app/presentation/pages/network/network_cubit.dart';
 
 class SendData {
   Timer? _timer;
   final EffectCubit _effectCubit;
   late EffectState _lastSendEffectState;
   final AlarmCubit _alarmCubit;
+  final NetworkCubit _networkCubit;
   late AlarmState _lastSendAlarmState;
 
   // final HomeScreenCubit _homeScreenCubit;
@@ -34,9 +36,11 @@ class SendData {
   SendData({
     required EffectCubit effectCubit,
     required AlarmCubit alarmCubit,
+    required NetworkCubit networkCubit,
     required BluetoothManager bluetoothManager,
   })  : _effectCubit = effectCubit,
         _alarmCubit = alarmCubit,
+        _networkCubit = networkCubit,
         _bluetoothManager = bluetoothManager {
     _lastSendEffectState = _effectCubit.state;
     _lastSendAlarmState = _alarmCubit.state;
@@ -130,9 +134,32 @@ class SendData {
     }
   }
 
-  void sendTime(){
-    
+  void sendNetworkSettings() {
+    var s = _bluetoothManager.getService("LampState");
+    var ch = s?.getCharacteristic("network");
+    if (s != null && ch != null) {
+      _bluetoothConnect.writeData(
+        // ("${_networkCubit.state.wifiName}|${_networkCubit.state.wifiPassword}|${_networkCubit.state.connectionLamp}")
+        "${_networkCubit.state.wifiName}|${_networkCubit.state.wifiPassword}"
+            .codeUnits,
+        serviceUuidStr: s.uuid,
+        characteristicUuidStr: ch.uuid,
+      );
+    }
   }
 
+  void sendConnectionLamp() {
+    var s = _bluetoothManager.getService("LampState");
+    var ch = s?.getCharacteristic("connectionLamp");
+    if (s != null && ch != null) {
+      _bluetoothConnect.writeData(
+        // ("${_networkCubit.state.wifiName}|${_networkCubit.state.wifiPassword}|${_networkCubit.state.connectionLamp}")
+        _networkCubit.state.connectionLamp.codeUnits,
+        serviceUuidStr: s.uuid,
+        characteristicUuidStr: ch.uuid,
+      );
+    }
+  }
 
+  void sendTime() {}
 }

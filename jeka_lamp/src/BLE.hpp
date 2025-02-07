@@ -13,6 +13,7 @@ BLECharacteristic *parametersCharacteristic;
 BLECharacteristic *alarmCharacteristic;
 BLECharacteristic *NetworkCharacteristic;
 BLECharacteristic *TimeCharacteristic;
+BLECharacteristic *ConnectionLampCharacteristic;
 
 namespace Callbacks {
 
@@ -20,15 +21,20 @@ class ServerCallbacks : public BLEServerCallbacks {
  public:
   void onConnect(BLEServer *pServer) override {
     deviceConnected = true;
-
+#if (SERIAL_LOG == 1)
     Serial.println("Устройство подключено.");
+#endif
     // updateDisplay(true, false);
   };
   void onDisconnect(BLEServer *pServer) override {
     deviceConnected = false;
+#if (SERIAL_LOG == 1)
+
     Serial.println("Устройство отключено.");
     Serial.println("Рекламирование BLE перезапущено.");
     pServer->getAdvertising()->start();
+#endif
+
     // updateDisplay(false, true);
   };
 };
@@ -48,9 +54,12 @@ class LampOnOffCallbacks : public BLECharacteristicCallbacks {
       _lampSettings->onOff = data[0];
       updateData();
     } else {
+#if (SERIAL_LOG == 1)
+
       Serial.printf(
           "LampState accepts a 1 uint8_t parameteк, and it was passed %d\n",
           length);
+#endif
     }
   };
   void onRead(BLECharacteristic *pCharacteristic) override {
@@ -79,10 +88,13 @@ class EffectParametersCallbacks : public BLECharacteristicCallbacks {
       _lampSettings->microphone = data[4];
       updateData();
     } else {
+#if (SERIAL_LOG == 1)
+
       Serial.printf(
           "EffectState accepts 5 uint8_t parameters, and it has been passed "
           "%d\n",
           length);
+#endif
     }
   };
   void onRead(BLECharacteristic *pCharacteristic) override {
@@ -113,10 +125,13 @@ class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
       }
       updateData();
     } else {
+#if (SERIAL_LOG == 1)
+
       Serial.printf(
           "AlarmState accepts 17 uint8_t parameters, and it has been "
           "passed%d\n",
           length);
+#endif
     }
   }
   void onRead(BLECharacteristic *pCharacteristic) override {
@@ -131,55 +146,144 @@ class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
 };
 
 class NetworkParametersCallbacks : public BLECharacteristicCallbacks {
-
  public:
   void onWrite(BLECharacteristic *pCharacteristic) override {
-    uint8_t *data = pCharacteristic->getData();
-    auto length = pCharacteristic->getLength();
+    // uint8_t *data = pCharacteristic->getData();
+    // auto length = pCharacteristic->getLength();
+    auto str = pCharacteristic->getValue();
+    if (!str.empty()) {
+      auto first = str.find('|');
+      // auto second = str.find('|', first + 1);
 
-    if (length == 4) {
+      if (first == std::string::npos) {
+#if (SERIAL_LOG == 1)
 
+        Serial.println("Ошибка: строка формата некорректна!");
+#endif
+
+        return;
+      }
+
+      auto s1 = str.substr(0, first);
+      auto s2 = str.substr(first + 1, str.size() - first - 1);
+      // auto s3 = str.substr(second + 1, str.size() - second - 1);
+      // Копируем строки в lampSettings
+      strncpy(lampSettings.wifiName, s1.c_str(), s1.size());
+      strncpy(lampSettings.wifiPassword, s2.c_str(), s2.size());
+      // strncpy(lampSettings.connectionLamp, s3.c_str(),
+      //         sizeof(lampSettings.connectionLamp) - 1);
+
+      // Гарантируем, что строки завершены нулём
+      lampSettings.wifiName[s1.size() - 1] = '\0';
+      lampSettings.wifiPassword[s2.size() - 1] = '\0';
+#if (SERIAL_LOG == 1)
+
+      Serial.printf("--------------------\n\t%s\n\t%s\n--------------------\n",
+                    lampSettings.wifiName, lampSettings.wifiPassword);
+      // lampSettings.connectionLamp[sizeof(lampSettings.connectionLamp) - 1] =
+      //     '\0';
+      Serial.println("Настройки WiFi обновлены!");
+#endif
+
+      updateData();
+      wifiInit();
     } else {
+#if (SERIAL_LOG == 1)
+
       Serial.printf(
-          "NetworkState accepts 17 uint8_t parameters, and it has been "
-          "passed%d\n",
-          length);
+          "NetworkState accepts string parameters, and it was passed an "
+          "incorrect starting parameter");
+#endif
     }
   }
-  // void onRead(BLECharacteristic *pCharacteristic) override {
-  // }
+  void onRead(BLECharacteristic *pCharacteristic) override {
+    std::string temp = std::string(lampSettings.wifiName) + "|" +
+                       std::string(lampSettings.wifiPassword);
+    //  std::string(lampSettings.wifiPassword) + "|" +
+    //  std::string(lampSettings.connectionLamp);
+
+    pCharacteristic->setValue(temp);
+  }
 };
 
-
-class TimeParametersCallbacks : public BLECharacteristicCallbacks {
-
+class ConnectionLampParametersCallbacks : public BLECharacteristicCallbacks {
  public:
   void onWrite(BLECharacteristic *pCharacteristic) override {
-    uint8_t *data = pCharacteristic->getData();
-    auto length = pCharacteristic->getLength();
+    // uint8_t *data = pCharacteristic->getData();
+    // auto length = pCharacteristic->getLength();
+    auto str = pCharacteristic->getValue();
+    if (!str.empty()) {
+      // auto s1 = str.substr(0, first);
+      // auto s2 = str.substr(first + 1, str.size() - first - 1);
+      // auto s3 = str.substr(second + 1, str.size() - second - 1);
+      // Копируем строки в lampSettings
+      // strncpy(lampSettings.wifiName, s1.c_str(),
+      //         sizeof(lampSettings.wifiName) - 1);
+      // strncpy(lampSettings.wifiPassword, s2.c_str(),
+      //         sizeof(lampSettings.wifiPassword) - 1);
+      strncpy(lampSettings.connectionLamp, str.c_str(), str.size());
 
-    if (length == 4) {
-      now.sec = ;
-      now.min = ;
-      now.hour = ;
-      now.day = ;
-      now.setMs(0)
+      // Гарантируем, что строки завершены нулём
+      // lampSettings.wifiName[sizeof(lampSettings.wifiName) - 1] = '\0';
+      // lampSettings.wifiPassword[sizeof(lampSettings.wifiPassword) - 1] =
+      // '\0';
+      lampSettings.connectionLamp[str.size() - 1] = '\0';
+#if (SERIAL_LOG == 1)
+
+      Serial.println("Настройки WiFi обновлены!");
+      Serial.printf("--------------------\n\t%s\n--------------------\n",
+                    lampSettings.connectionLamp);
+#endif
+
+      updateData();
     } else {
+#if (SERIAL_LOG == 1)
+
       Serial.printf(
-          "TimeState accepts 17 uint8_t parameters, and it has been "
-          "passed%d\n",
-          length);
+          "NetworkState accepts string parameters, and it was passed an "
+          "incorrect starting parameter");
+#endif
     }
   }
-  // void onRead(BLECharacteristic *pCharacteristic) override {
-  // }
+  void onRead(BLECharacteristic *pCharacteristic) override {
+    std::string temp = std::string(lampSettings.connectionLamp);
+    //  std::string(lampSettings.wifiPassword) + "|" +
+
+    pCharacteristic->setValue(temp);
+  }
 };
 
+// class TimeParametersCallbacks : public BLECharacteristicCallbacks {
 
+//  public:
+//   void onWrite(BLECharacteristic *pCharacteristic) override {
+//     uint8_t *data = pCharacteristic->getData();
+//     auto length = pCharacteristic->getLength();
+
+//     if (length == 4) {
+//       now.sec = ;
+//       now.min = ;
+//       now.hour = ;
+//       now.day = ;
+//       now.setMs(0)
+//     } else {
+//       Serial.printf(
+//           "TimeState accepts 17 uint8_t parameters, and it has been "
+//           "passed%d\n",
+//           length);
+//     }
+//   }
+//   // void onRead(BLECharacteristic *pCharacteristic) override {
+//   // }
+// };
 
 }  // namespace Callbacks
 void initBLE(LampSettings *lampSettings) {
+#if (SERIAL_LOG == 1)
+
   Serial.println("Запуск BLE-сервера...");
+#endif
+
   BLEDevice::init(BLE_SERVER_NAME);
 
   pServer = BLEDevice::createServer();
@@ -212,26 +316,36 @@ void initBLE(LampSettings *lampSettings) {
   alarmCharacteristic->addDescriptor(new BLE2902());
 
   NetworkCharacteristic = pService->createCharacteristic(
-      ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
-                                     BLECharacteristic::PROPERTY_WRITE |
-                                     BLECharacteristic::PROPERTY_NOTIFY);
+      NETWORK_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                                       BLECharacteristic::PROPERTY_WRITE |
+                                       BLECharacteristic::PROPERTY_NOTIFY);
   NetworkCharacteristic->setCallbacks(
       new Callbacks::NetworkParametersCallbacks());
   NetworkCharacteristic->addDescriptor(new BLE2902());
 
-  TimeCharacteristic = pService->createCharacteristic(
-      ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
-                                     BLECharacteristic::PROPERTY_WRITE |
-                                     BLECharacteristic::PROPERTY_NOTIFY);
-  TimeCharacteristic->setCallbacks(
-      new Callbacks::TimeParametersCallbacks());
-  TimeCharacteristic->addDescriptor(new BLE2902());
+  ConnectionLampCharacteristic = pService->createCharacteristic(
+      CONNECTION_LAMP_CHARACTERISTIC_UUID,
+      BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |
+          BLECharacteristic::PROPERTY_NOTIFY);
+  ConnectionLampCharacteristic->setCallbacks(
+      new Callbacks::NetworkParametersCallbacks());
+  ConnectionLampCharacteristic->addDescriptor(new BLE2902());
 
+  // TimeCharacteristic = pService->createCharacteristic(
+  //     ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+  //                                    BLECharacteristic::PROPERTY_WRITE |
+  //                                    BLECharacteristic::PROPERTY_NOTIFY);
+  // TimeCharacteristic->setCallbacks(
+  //     new Callbacks::TimeParametersCallbacks());
+  // TimeCharacteristic->addDescriptor(new BLE2902());
 
   pService->start();
 
   pServer->getAdvertising()->start();
+#if (SERIAL_LOG == 1)
+
   Serial.println("BLE-сервер запущен и ожидает подключений.");
+#endif
 }
 }  // namespace BLE
 

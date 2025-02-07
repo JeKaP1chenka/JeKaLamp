@@ -20,6 +20,7 @@ struct LampSettings {
   // settings wifi
   char wifiName[64] = {0};
   char wifiPassword[64] = {0};
+  char connectionLamp[16] = {0};
 } lampSettings;
 
 #endif  // __LAMPSETTINGS_H__

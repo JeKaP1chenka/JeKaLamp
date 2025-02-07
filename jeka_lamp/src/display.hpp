@@ -3,6 +3,8 @@
 
 #include <include.h>
 
+#if (DISPLAY_DEBUG == 1)
+
 GyverOLED<SSD1306_128x64> oled;
 
 void updateDisplay() {
@@ -59,5 +61,7 @@ void initDisplay() {
   oled.print("");
   oled.update();
 }
+#endif
+
 
 #endif  // __DISPLAY_HPP__

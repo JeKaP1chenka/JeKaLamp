@@ -7,6 +7,7 @@ import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_page.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_page.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jeka_lamp_app/presentation/pages/network/network_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool autoSendData = false;
-  var _selectedIndex = 0;
+  var _selectedIndex = 2;
 
   final WidgetStateProperty<Icon> thumbIcon = WidgetStateProperty<Icon>.fromMap(
     <WidgetStatesConstraint, Icon>{
@@ -38,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
       label: "Alarm",
     ),
     BottomNavigationElement(
-      widget: Center(child: Text("network")),
+      widget: NetworkPage(),
       icon: Icon(Icons.network_wifi),
       label: "Network",
     ),

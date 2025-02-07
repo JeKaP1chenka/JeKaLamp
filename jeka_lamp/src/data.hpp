@@ -4,6 +4,8 @@
 #include <include.h>
 
 void debugData() {
+#if (SERIAL_LOG == 1)
+
   Serial.printf("---------------------------\n");
   Serial.printf("onOff:\t%d\n", lampSettings.onOff);
   Serial.printf("effectType:\t%d\n", lampSettings.effectType);
@@ -24,6 +26,7 @@ void debugData() {
   Serial.printf("wifiPassword:\t%s\n", lampSettings.wifiPassword);
 
   Serial.printf("---------------------------\n");
+#endif
 }
 
 #if (SAVE_DATA == 1)
@@ -35,9 +38,17 @@ void loadData() {
   preferences.begin("lamp", true);
   if (preferences.getBytesLength("settings") == sizeof(lampSettings)) {
     preferences.getBytes("settings", &lampSettings, sizeof(lampSettings));
+#if (SERIAL_LOG == 1)
+
     Serial.println("Данные загружены!");
+#endif
+
   } else {
+#if (SERIAL_LOG == 1)
+
     Serial.println("Данные не найдены, сбрасываем на дефолтные.");
+#endif
+
     memset(&lampSettings, 0, sizeof(lampSettings));
   }
   preferences.end();
@@ -51,22 +62,26 @@ void saveData() {
   preferences.end();
 
   savePending = false;
-  Serial.println("Данные сохранены!");
-}
+#if (SERIAL_LOG == 1)
 
+  Serial.println("Данные сохранены!");
+#endif
+}
 
 void updateData() {
   lastUpdateTime = millis();
   savePending = true;
+#if (SERIAL_LOG == 1)
+
   Serial.println("Данные обновлены, сохранение отложено...");
+#endif
+
   debugData();
 }
 #endif
 
-void loadData(){}
-void saveData(){}
-void updateData(){
-  debugData();
-}
+void loadData() {}
+void saveData() {}
+void updateData() { debugData(); }
 
 #endif  // __DATA_H__

@@ -11,6 +11,7 @@ import 'package:jeka_lamp_app/locator_service.dart' as di;
 import 'package:jeka_lamp_app/presentation/home_screen/home_screen_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/alarm/alarm_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
+import 'package:jeka_lamp_app/presentation/pages/network/network_cubit.dart';
 
 void main() async {
   FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
@@ -28,6 +29,7 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider<EffectCubit>(create: (context) => di.s1<EffectCubit>()),
         BlocProvider<AlarmCubit>(create: (context) => di.s1<AlarmCubit>()),
+        BlocProvider<NetworkCubit>(create: (context) => di.s1<NetworkCubit>()),
         BlocProvider<HomeScreenCubit>(
             create: (context) => di.s1<HomeScreenCubit>()),
       ],

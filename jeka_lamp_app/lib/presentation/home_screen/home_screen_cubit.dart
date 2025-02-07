@@ -11,6 +11,7 @@ import 'package:jeka_lamp_app/presentation/pages/effect/effect_cubit.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_page.dart';
 import 'package:jeka_lamp_app/presentation/pages/effect/effect_state.dart';
 import 'package:jeka_lamp_app/locator_service.dart' as di;
+import 'package:jeka_lamp_app/presentation/pages/network/network_cubit.dart';
 import 'package:jeka_lamp_app/presentation/send_data.dart';
 
 class HomeScreenCubit extends Cubit<HomeScreenState> {
@@ -46,6 +47,19 @@ class HomeScreenCubit extends Cubit<HomeScreenState> {
                 serviceUuidStr: "1234",
                 characteristicUuidStr: "1236",
               );
+          di.s1<BluetoothConnect>().receiveData(
+                di.s1<NetworkCubit>().onValueReceived,
+                serviceUuidStr: "1234",
+                characteristicUuidStr: "1237",
+              );
+
+          di.s1<BluetoothConnect>().receiveData(
+                di.s1<NetworkCubit>().onValueReceivedConnectionLamp,
+                serviceUuidStr: "1234",
+                characteristicUuidStr: "1238",
+              );
+
+          
 
           // di.s1<BluetoothConnect>().readData(
           //       serviceUuidStr: "1234",

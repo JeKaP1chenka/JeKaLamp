@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
+
 Preferences preferences;
 // #include <EEPROM.h>
 // #include <esp_attr.h>
@@ -13,9 +14,14 @@ Preferences preferences;
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
+#include <WiFi.h>
+
 
 #include <FastLED.h>
+#if (DISPLAY_DEBUG == 1)
 #include <GyverOLED.h>
+#endif
+
 
 #include <define.hpp>
 
@@ -23,8 +29,9 @@ Preferences preferences;
 #include "utils/timerMillis.h"
 #include "utils/Time.h"
 #include <LampSettings.hpp>
-#include <sound.hpp>
 #include <ledMatrix.hpp>
+#include "wifiFunc.hpp"
+#include <sound.hpp>
 #include <data.hpp>
 #include <BLE.hpp>
 #include <effects/effect.hpp>
