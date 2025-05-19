@@ -63,5 +63,4 @@ void initDisplay() {
 }
 #endif
 
-
 #endif  // __DISPLAY_HPP__

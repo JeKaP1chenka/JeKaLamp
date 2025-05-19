@@ -26,7 +26,7 @@ void debugData() {
   Serial.printf("wifiPassword:\t%s\n", lampSettings.wifiPassword);
 
   Serial.printf("---------------------------\n");
-#endif
+#endif  // SERIAL_LOG
 }
 
 #if (SAVE_DATA == 1)
@@ -42,7 +42,6 @@ void loadData() {
 
     Serial.println("Данные загружены!");
 #endif
-
   } else {
 #if (SERIAL_LOG == 1)
 
@@ -78,10 +77,10 @@ void updateData() {
 
   debugData();
 }
-#endif
-
+#else   // SAVE_DATA
 void loadData() {}
 void saveData() {}
 void updateData() { debugData(); }
+#endif  // SAVE_DATA
 
 #endif  // __DATA_H__

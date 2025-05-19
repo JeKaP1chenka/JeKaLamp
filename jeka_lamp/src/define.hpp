@@ -1,7 +1,6 @@
 #ifndef __DEFINE_H__
 #define __DEFINE_H__
 
-
 // настройка BLE сурвера
 #define BLE_SERVER_NAME "JeKaLamp_REV1"
 
@@ -36,7 +35,7 @@
 #define MATRIX_TYPE 0
 
 #define SERIAL_DEBUG 1
-#define DISPLAY_DEBUG 0
+#define DISPLAY_DEBUG 1
 #define SAVE_DATA 0
 #define SERIAL_LOG 0
 

@@ -4,27 +4,32 @@
 #include "../include.h"
 #include "dynamicColor.hpp"
 #include "fire.hpp"
-#include "staticColor.hpp"
 #include "pulse.hpp"
+#include "staticColor.hpp"
+
 
 void effectVoid() {}
 
 const int8_t effectsArraySize = 4;
-void (*effectsArray[effectsArraySize])(byte, int) = {staticColorTick, dynamicColorTick, fireTick, pulseTick};
+void (*effectsArray[effectsArraySize])(byte, int) = {
+    staticColorTick, dynamicColorTick, fireTick, pulseTick};
 
 void effectTick() {
   static timerMillis tmr(30, true);
   if (!tmr.isReady()) return;
-  // Serial.printf("$%d %d %d %d %d %d;", sound.getVol(), sound.getMin(), sound.getMax(), sound.getRaw(), sound.getRawMax(), ((int16_t)sound.getPP() * 500));
+  // Serial.printf("$%d %d %d %d %d %d;", sound.getVol(), sound.getMin(),
+  // sound.getMax(), sound.getRaw(), sound.getRawMax(), ((int16_t)sound.getPP()
+  // * 500));
   byte scale = lampSettings.effectParameter;
   int len = 16;
-  if (lampSettings.microphone){
+  if (lampSettings.microphone) {
     len = map(sound.getVol(), 0, 255, 1, 16);
   }
 
   FastLED.setBrightness(lampSettings.brightness);
-  if (1 <= lampSettings.effectType && lampSettings.effectType <= effectsArraySize) {
-    effectsArray[lampSettings.effectType-1](scale, len);
+  if (1 <= lampSettings.effectType &&
+      lampSettings.effectType <= effectsArraySize) {
+    effectsArray[lampSettings.effectType - 1](scale, len);
   }
   FastLED.show();
 }

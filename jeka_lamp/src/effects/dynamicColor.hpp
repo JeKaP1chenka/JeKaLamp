@@ -4,8 +4,6 @@
 #include "../include.h"
 #include "dynamicColor.hpp"
 
-void dynamicColorTick(byte scale, int len){
+void dynamicColorTick(byte scale, int len) {}
 
-}
-
-#endif // __DYNAMICCOLOR_H__
+#endif  // __DYNAMICCOLOR_H__
