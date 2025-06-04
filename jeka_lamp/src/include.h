@@ -5,7 +5,6 @@
 #include <Preferences.h>
 #include <stdint.h>
 
-
 Preferences preferences;
 // #include <EEPROM.h>
 // #include <esp_attr.h>
@@ -16,6 +15,7 @@ Preferences preferences;
 #include <BLEUtils.h>
 #include <FastLED.h>
 #include <WiFi.h>
+#include <HTTPClient.h>
 
 #include <define.hpp>
 
@@ -23,20 +23,24 @@ Preferences preferences;
 #include <GyverOLED.h>
 #endif
 
-#include <BLE.hpp>
 #include <LampSettings.hpp>
-#include <data.hpp>
-#include <effects/effect.hpp>
-#include <ledMatrix.hpp>
-#include <sound.hpp>
+#include "global.hpp"
 
 #include "utils/Time.h"
 #include "utils/timerMillis.h"
-#include "vol/VolAnalyzer.h"
+#include <ledMatrix.hpp>
 #include "wifiFunc.hpp"
-
+#include <data.hpp>
+#include <BLE.hpp>
 #if (DISPLAY_DEBUG == 1)
 #include <display.hpp>
 #endif
+
+#include <effects/effect.hpp>
+#include <sound.hpp>
+
+#include "vol/VolAnalyzer.h"
+
+
 
 #endif  // __INCLUDE_H__

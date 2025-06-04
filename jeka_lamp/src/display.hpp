@@ -1,11 +1,11 @@
 #ifndef __DISPLAY_HPP__
 #define __DISPLAY_HPP__
 
+// #include <BLE.h>
 #include <include.h>
 
 #if (DISPLAY_DEBUG == 1)
 
-GyverOLED<SSD1306_128x64> oled;
 
 void updateDisplay() {
   static timerMillis tmr(500, true);
@@ -13,6 +13,12 @@ void updateDisplay() {
 
   oled.clear();
 
+  oled.setCursor(0, 0);
+  if (!BLE::deviceConnected) {
+    oled.print("отключено");
+  } else {
+    oled.print("подключено");
+  }
   oled.setCursor(0, 1);
   oled.printf("s:%d t:%d m:%d", lampSettings.onOff, lampSettings.effectType,
               lampSettings.microphone);
@@ -41,13 +47,8 @@ void updateDisplay() {
               lampSettings.timeOfDays[9], lampSettings.timeOfDays[10],
               lampSettings.timeOfDays[11], lampSettings.timeOfDays[12],
               lampSettings.timeOfDays[13]);
-
-  oled.setCursor(0, 0);
-  if (!BLE::deviceConnected) {
-    oled.print("отключено");
-  } else {
-    oled.print("подключено");
-  }
+  oled.setCursor(0, 7);
+  oled.printf("WiFi:%d", WiFi.status());
 
   oled.update();
 }

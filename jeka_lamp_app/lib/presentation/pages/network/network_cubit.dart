@@ -60,6 +60,8 @@ class NetworkCubit extends Cubit<NetworkState> {
   }
 
   void sendData() {
+    // wifiNameController.text = "Xiaomi";
+    // wifiPasswordController.text = "300stas111";
     emit(state.copyWith(
       wifiName: wifiNameController.text,
       wifiPassword: wifiPasswordController.text,

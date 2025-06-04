@@ -1,6 +1,7 @@
 #ifndef __SOUND_H__
 #define __SOUND_H__
 
+#include "vol/VolAnalyzer.h"
 #include "include.h"
 
 VolAnalyzer sound(SOUND_PIN);

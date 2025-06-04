@@ -6,7 +6,8 @@
 #include "fire.hpp"
 #include "pulse.hpp"
 #include "staticColor.hpp"
-
+#include "../utils/Time.h"
+#include "../utils/timerMillis.h"
 
 void effectVoid() {}
 

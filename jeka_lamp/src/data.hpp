@@ -3,6 +3,8 @@
 
 #include <include.h>
 
+#include <LampSettings.hpp>
+
 void debugData() {
 #if (SERIAL_LOG == 1)
 
@@ -28,9 +30,7 @@ void debugData() {
   Serial.printf("---------------------------\n");
 #endif  // SERIAL_LOG
 }
-
 #if (SAVE_DATA == 1)
-
 volatile bool savePending = false;
 unsigned long lastUpdateTime = 0;
 
@@ -77,10 +77,10 @@ void updateData() {
 
   debugData();
 }
-#else   // SAVE_DATA
+#else
 void loadData() {}
 void saveData() {}
 void updateData() { debugData(); }
-#endif  // SAVE_DATA
+#endif
 
 #endif  // __DATA_H__

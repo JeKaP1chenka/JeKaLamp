@@ -1,6 +1,8 @@
 #ifndef __DEFINE_H__
 #define __DEFINE_H__
 
+#include "include.h"
+
 // настройка BLE сурвера
 #define BLE_SERVER_NAME "JeKaLamp_REV1"
 
@@ -37,10 +39,12 @@
 #define SERIAL_DEBUG 1
 #define DISPLAY_DEBUG 1
 #define SAVE_DATA 0
-#define SERIAL_LOG 0
+#define SERIAL_LOG 1
 
 // wifi
 const char* url = "http://185.221.215.59:9999/";
 #define WIFI_TIMEOUT_MS 10000
+
+
 
 #endif  // __DEFINE_H__

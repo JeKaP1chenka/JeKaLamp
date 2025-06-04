@@ -62,16 +62,44 @@ class _NetworkState extends State<NetworkPage> {
           onSubmitted: cubit.updateWifiPassword,
         ),
         SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerRight, // Размещение справа
-          child: ElevatedButton(
-            style: AppTheme.buttonStyle,
-            onPressed: () {
-              cubit.sendData();
-            },
-            child: Text('Send'),
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ElevatedButton(
+              style: AppTheme.buttonStyle,
+              onPressed: () {
+                cubit.wifiNameController.text = "JeKa";
+                cubit.wifiPasswordController.text = "12345678";
+              },
+              child: Text('t1'),
+            ),
+            ElevatedButton(
+              style: AppTheme.buttonStyle,
+              onPressed: () {
+                cubit.wifiNameController.text = "Xiaomi";
+                cubit.wifiPasswordController.text = "300stas111";
+              },
+              child: Text('t2'),
+            ),
+            ElevatedButton(
+              style: AppTheme.buttonStyle,
+              onPressed: () {
+                cubit.sendData();
+              },
+              child: Text('Send'),
+            )
+          ],
         ),
+        // Align(
+        //   alignment: Alignment.centerRight, // Размещение справа
+        //   child: ElevatedButton(
+        //     style: AppTheme.buttonStyle,
+        //     onPressed: () {
+        //       cubit.sendData();
+        //     },
+        //     child: Text('Send'),
+        //   ),
+        // ),
       ],
     );
   }

@@ -1,6 +1,7 @@
 #ifndef __PULSE_H__
 #define __PULSE_H__
 
+#include "../sound.hpp"
 #include "../include.h"
 
 void pulseTick(byte scale, int len) {

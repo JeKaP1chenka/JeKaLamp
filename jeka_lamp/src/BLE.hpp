@@ -3,6 +3,10 @@
 
 #include <include.h>
 
+#include <LampSettings.hpp>
+#include <data.hpp>
+#include <wifiFunc.hpp>
+
 namespace BLE {
 
 bool deviceConnected = false;
@@ -25,7 +29,7 @@ class ServerCallbacks : public BLEServerCallbacks {
     Serial.println("Устройство подключено.");
 #endif
     // updateDisplay(true, false);
-  };
+  }
   void onDisconnect(BLEServer *pServer) override {
     deviceConnected = false;
 #if (SERIAL_LOG == 1)
@@ -36,7 +40,7 @@ class ServerCallbacks : public BLEServerCallbacks {
 #endif
 
     // updateDisplay(false, true);
-  };
+  }
 };
 
 class LampOnOffCallbacks : public BLECharacteristicCallbacks {
@@ -61,12 +65,12 @@ class LampOnOffCallbacks : public BLECharacteristicCallbacks {
           length);
 #endif
     }
-  };
+  }
   void onRead(BLECharacteristic *pCharacteristic) override {
     uint8_t temp1[1]{_lampSettings->onOff};
 
     pCharacteristic->setValue(temp1, 1);
-  };
+  }
 };
 
 class EffectParametersCallbacks : public BLECharacteristicCallbacks {
@@ -75,7 +79,7 @@ class EffectParametersCallbacks : public BLECharacteristicCallbacks {
  public:
   EffectParametersCallbacks(LampSettings *lampSettings) {
     _lampSettings = lampSettings;
-  };
+  }
   void onWrite(BLECharacteristic *pCharacteristic) override {
     uint8_t *data = pCharacteristic->getData();
     auto length = pCharacteristic->getLength();
@@ -96,13 +100,13 @@ class EffectParametersCallbacks : public BLECharacteristicCallbacks {
           length);
 #endif
     }
-  };
+  }
   void onRead(BLECharacteristic *pCharacteristic) override {
     uint8_t temp[5] = {_lampSettings->effectType, _lampSettings->brightness,
                        _lampSettings->speed, _lampSettings->effectParameter,
                        _lampSettings->microphone};
     pCharacteristic->setValue(temp, 5);
-  };
+  }
 };
 
 class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
@@ -148,48 +152,31 @@ class AlarmParametersCallbacks : public BLECharacteristicCallbacks {
 class NetworkParametersCallbacks : public BLECharacteristicCallbacks {
  public:
   void onWrite(BLECharacteristic *pCharacteristic) override {
-    // uint8_t *data = pCharacteristic->getData();
-    // auto length = pCharacteristic->getLength();
-    auto str = pCharacteristic->getValue();
-    if (!str.empty()) {
-      auto first = str.find('|');
-      // auto second = str.find('|', first + 1);
+    uint8_t *data = pCharacteristic->getData();
+    auto length = pCharacteristic->getLength();
 
-      if (first == std::string::npos) {
-#if (SERIAL_LOG == 1)
-
-        Serial.println("Ошибка: строка формата некорректна!");
-#endif
-
-        return;
+    if (length > 3) {
+      uint8_t p = 0;
+      char *temp_ptr = lampSettings.wifiName;
+      for (size_t i = 0; i < length; ++i) {
+        if ((char)data[i] == '|') {
+          temp_ptr[p] = '\0';
+          temp_ptr = lampSettings.wifiPassword;
+          p = 0;
+          continue;
+        }
+        temp_ptr[p++] = (char)data[i];
       }
-
-      auto s1 = str.substr(0, first);
-      auto s2 = str.substr(first + 1, str.size() - first - 1);
-      // auto s3 = str.substr(second + 1, str.size() - second - 1);
-      // Копируем строки в lampSettings
-      strncpy(lampSettings.wifiName, s1.c_str(), s1.size());
-      strncpy(lampSettings.wifiPassword, s2.c_str(), s2.size());
-      // strncpy(lampSettings.connectionLamp, s3.c_str(),
-      //         sizeof(lampSettings.connectionLamp) - 1);
-
-      // Гарантируем, что строки завершены нулём
-      lampSettings.wifiName[s1.size() - 1] = '\0';
-      lampSettings.wifiPassword[s2.size() - 1] = '\0';
+      temp_ptr[p] = '\0';
 #if (SERIAL_LOG == 1)
-
       Serial.printf("--------------------\n\t%s\n\t%s\n--------------------\n",
                     lampSettings.wifiName, lampSettings.wifiPassword);
-      // lampSettings.connectionLamp[sizeof(lampSettings.connectionLamp) - 1] =
-      //     '\0';
       Serial.println("Настройки WiFi обновлены!");
 #endif
-
       updateData();
       wifiInit();
     } else {
 #if (SERIAL_LOG == 1)
-
       Serial.printf(
           "NetworkState accepts string parameters, and it was passed an "
           "incorrect starting parameter");

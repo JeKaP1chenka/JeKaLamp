@@ -19,11 +19,11 @@ DEFINE_GRADIENT_PALETTE(firepal){
 CRGBPalette16 myPal = firepal;
 byte a = 0;
 
-bool loading = true;
 
 void fireTick(byte scale, int len) {
   // static int len = 16; //! для светомузыки
   // static int scale = 100;
+  static bool loading = true;
   static uint8_t deltaValue;
   static uint8_t deltaHue;
   static uint8_t step;

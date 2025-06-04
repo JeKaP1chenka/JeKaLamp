@@ -7,7 +7,8 @@
 
 bool switchBtn = true;
 Time now;
-void btnUpdate();
+static void btnUpdate();
+static void debugDataUpdate();
 
 void setup() {
   loadData();
@@ -54,7 +55,7 @@ void loop() {
   if (BLE::deviceConnected) {
   }
 }
-
+void sendQuery();
 void btnUpdate() {
   static timerMillis tmr(100, true);
   if (!tmr.isReady()) return;
@@ -62,49 +63,75 @@ void btnUpdate() {
   // Serial.printf("%d %d\n", switchBtn, btn);
   if (!btn and switchBtn) {
     switchBtn = false;
-
-    lampSettings.effectType = rand() % 10;
-    lampSettings.brightness = rand() % 256;
-    lampSettings.speed = rand() % 256;
-    lampSettings.effectParameter = rand() % 256;
-    lampSettings.microphone = rand() % 2;
-    uint8_t temp[5] = {
-        lampSettings.effectType, lampSettings.brightness,
-        lampSettings.speed,      lampSettings.effectParameter,
-        lampSettings.microphone,
-    };
-    BLE::parametersCharacteristic->setValue(temp, 5);
-    BLE::parametersCharacteristic->notify();
-
-    lampSettings.onOff = !lampSettings.onOff;
-    uint8_t temp1[1]{
-        lampSettings.onOff,
-    };
-
-    BLE::onOffCharacteristic->setValue(temp1, 1);
-    BLE::onOffCharacteristic->notify();
-
-    lampSettings.alarmState = rand() % 256;
-    lampSettings.timeBeforeAlarm = (rand() % 12) * 5 + 5;
-    lampSettings.timeAfterAlarm = (rand() % 12) * 5 + 5;
-    for (int i = 0; i < 7; ++i) {
-      lampSettings.timeOfDays[i * 2] = rand() % 24;
-      lampSettings.timeOfDays[i * 2 + 1] = rand() % 60;
-    }
-
-    uint8_t temp2[17] = {
-        lampSettings.alarmState,
-        lampSettings.timeBeforeAlarm,
-        lampSettings.timeAfterAlarm,
-    };
-    for (int i = 3; i < 17; ++i) {
-      temp2[i] = lampSettings.timeOfDays[i - 3];
-    }
-
-    BLE::alarmCharacteristic->setValue(temp2, 17);
-    BLE::alarmCharacteristic->notify();
-    updateData();
+    debugDataUpdate();
+    sendQuery();
   } else if (btn and !switchBtn) {
     switchBtn = true;
   }
+}
+void onResponse(int httpCode, String response) {
+  Serial.printf("Ответ HTTP %d: %s\n", httpCode, response.c_str());
+}
+void sendQuery() {
+  Serial.println("start sendQuery");
+  // asyncHttpGet("https://httpbin.org/get", onResponse);
+  HTTPClient http;
+  http.begin("http://192.168.1.248:9999/send_signal/asd");
+  String httpResponse = "";
+  int httpCode = 0;
+  // Делаем запрос (синхронно, но вызывается из таймера, не из loop)
+  httpCode = http.GET();
+  if (httpCode > 0) {
+    httpResponse = http.getString();
+  } else {
+    httpResponse = "Error: " + http.errorToString(httpCode);
+  }
+
+  http.end();
+  Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode, httpResponse.c_str());
+
+  Serial.println("end sendQuery");
+}
+
+void debugDataUpdate() {
+  lampSettings.effectType = rand() % 10;
+  lampSettings.brightness = rand() % 256;
+  lampSettings.speed = rand() % 256;
+  lampSettings.effectParameter = rand() % 256;
+  lampSettings.microphone = rand() % 2;
+  uint8_t temp[5] = {
+      lampSettings.effectType,      lampSettings.brightness, lampSettings.speed,
+      lampSettings.effectParameter, lampSettings.microphone,
+  };
+  BLE::parametersCharacteristic->setValue(temp, 5);
+  BLE::parametersCharacteristic->notify();
+
+  lampSettings.onOff = !lampSettings.onOff;
+  uint8_t temp1[1]{
+      lampSettings.onOff,
+  };
+
+  BLE::onOffCharacteristic->setValue(temp1, 1);
+  BLE::onOffCharacteristic->notify();
+
+  lampSettings.alarmState = rand() % 256;
+  lampSettings.timeBeforeAlarm = (rand() % 12) * 5 + 5;
+  lampSettings.timeAfterAlarm = (rand() % 12) * 5 + 5;
+  for (int i = 0; i < 7; ++i) {
+    lampSettings.timeOfDays[i * 2] = rand() % 24;
+    lampSettings.timeOfDays[i * 2 + 1] = rand() % 60;
+  }
+
+  uint8_t temp2[17] = {
+      lampSettings.alarmState,
+      lampSettings.timeBeforeAlarm,
+      lampSettings.timeAfterAlarm,
+  };
+  for (int i = 3; i < 17; ++i) {
+    temp2[i] = lampSettings.timeOfDays[i - 3];
+  }
+
+  BLE::alarmCharacteristic->setValue(temp2, 17);
+  BLE::alarmCharacteristic->notify();
+  updateData();
 }
