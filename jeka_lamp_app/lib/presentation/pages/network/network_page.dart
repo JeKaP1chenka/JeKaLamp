@@ -76,8 +76,8 @@ class _NetworkState extends State<NetworkPage> {
             ElevatedButton(
               style: AppTheme.buttonStyle,
               onPressed: () {
-                cubit.wifiNameController.text = "Xiaomi";
-                cubit.wifiPasswordController.text = "300stas111";
+                cubit.wifiNameController.text = "ELTX-2.4GHz_WiFi_E028";
+                cubit.wifiPasswordController.text = "GP2F062530";
               },
               child: Text('t2'),
             ),

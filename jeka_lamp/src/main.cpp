@@ -76,7 +76,7 @@ void sendQuery() {
   Serial.println("start sendQuery");
   // asyncHttpGet("https://httpbin.org/get", onResponse);
   HTTPClient http;
-  http.begin("http://192.168.1.248:9999/send_signal/asd");
+  http.begin("http://192.168.1.7:9999/send_signal/asd");
   String httpResponse = "";
   int httpCode = 0;
   // Делаем запрос (синхронно, но вызывается из таймера, не из loop)
