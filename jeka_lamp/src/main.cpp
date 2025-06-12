@@ -1,5 +1,8 @@
 #include <bitset>
 #include <main.hpp>
+
+#include "AsyncHTTP/async_http_client.h"
+#include "WiFiMulti.h"
 // Глобальные переменные
 
 // uint8_t myData[2] = {0, 0};
@@ -72,25 +75,73 @@ void btnUpdate() {
 void onResponse(int httpCode, String response) {
   Serial.printf("Ответ HTTP %d: %s\n", httpCode, response.c_str());
 }
+bool done;
+WiFiMulti wifiMulti;
 void sendQuery() {
-  Serial.println("start sendQuery");
-  // asyncHttpGet("https://httpbin.org/get", onResponse);
-  HTTPClient http;
-  http.begin("http://192.168.1.7:9999/send_signal/asd");
-  String httpResponse = "";
-  int httpCode = 0;
-  // Делаем запрос (синхронно, но вызывается из таймера, не из loop)
-  httpCode = http.GET();
-  if (httpCode > 0) {
-    httpResponse = http.getString();
-  } else {
-    httpResponse = "Error: " + http.errorToString(httpCode);
+  AsyncHTTPClient http;
+  done = false;
+  if ((WiFi.status() == WL_CONNECTED)) {
+    Serial.print("IP address of Device: ");
+    Serial.println(WiFi.localIP().toString().c_str());
+
+    String output;
+
+    auto connection_handler = [&](HTTPConnectionState state) {
+      Serial.print("New state: ");
+      Serial.println((int)state);
+      Serial.flush();
+
+      switch (state) {
+        case HTTPConnectionState::ERROR:
+          Serial.print("Received error: ");
+          Serial.println(http.error_string(http.last_error()));
+          http.close();
+          break;
+        case HTTPConnectionState::DONE:
+          Serial.println("ALL DONE");
+          output = http.response().str();
+          Serial.println(output);
+          http.close();
+          break;
+        default:
+          break;
+      }
+    };
+
+    Serial.print("[HTTP] begin...\n");
+    http.begin("http://httpbin.org/robots.txt");  // HTTP
+
+    http.connect_timeout(2000);
+    http.response_timeout(2000);
+
+    http.reuse(true);
+
+    Serial.print("[HTTP] GET...\n");
+    // start connection and send HTTP header
+    http.GET(connection_handler);
+
   }
+  // Serial.println("start sendQuery");
+  // // asyncHttpGet("https://httpbin.org/get", onResponse);
+  // HTTPClient http;
+  // http.setTimeout(20000);
+  // http.begin("http://192.168.0.39:9999/send_signal/asd");
 
-  http.end();
-  Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode, httpResponse.c_str());
+  // String httpResponse = "";
+  // int httpCode = 0;
+  // // Делаем запрос (синхронно, но вызывается из таймера, не из loop)
+  // httpCode = http.GET();
+  // if (httpCode > 0) {
+  //   httpResponse = http.getString();
+  // } else {
+  //   httpResponse = "Error: " + http.errorToString(httpCode);
+  // }
 
-  Serial.println("end sendQuery");
+  // http.end();
+  // Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode,
+  // httpResponse.c_str());
+
+  // Serial.println("end sendQuery");
 }
 
 void debugDataUpdate() {

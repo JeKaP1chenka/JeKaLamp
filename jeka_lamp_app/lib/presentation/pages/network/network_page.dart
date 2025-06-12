@@ -81,6 +81,16 @@ class _NetworkState extends State<NetworkPage> {
               },
               child: Text('t2'),
             ),
+            
+            ElevatedButton(
+              style: AppTheme.buttonStyle,
+              onPressed: () {
+                cubit.wifiNameController.text = "SAD8 K2";
+                cubit.wifiPasswordController.text = "green1158490";
+              },
+              child: Text('t2'),
+            ),
+
             ElevatedButton(
               style: AppTheme.buttonStyle,
               onPressed: () {
