@@ -1,4 +1,5 @@
-# Название, Раздел, Подраздел, Адрес, Размер, Флаги
-nvs,      data, nvs,     0x9000,   0x3000,
-app0,     app,  factory, 0x10000,  0x370000,
-spiffs,   data, spiffs,  0x380000, 0x70000,
+# Название, Раздел, Подраздел,  Адрес,      Размер, Флаги
+nvs,        data,   nvs,          0x9000,   0x3000,
+app0,       app,    factory,     0x10000,   0x370000,
+spiffs,     data,   spiffs,      0x380000,   0x70000,
+coredump, data, coredump,         , 0x10000,

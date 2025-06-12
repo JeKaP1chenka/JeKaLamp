@@ -76,7 +76,7 @@ void onResponse(int httpCode, String response) {
   Serial.printf("Ответ HTTP %d: %s\n", httpCode, response.c_str());
 }
 bool done;
-WiFiMulti wifiMulti;
+// WiFiMulti wifiMulti;
 void sendQuery() {
   AsyncHTTPClient http;
   done = false;
@@ -99,7 +99,7 @@ void sendQuery() {
           break;
         case HTTPConnectionState::DONE:
           Serial.println("ALL DONE");
-          output = http.response().str();
+          output = http.response_arduino_string();
           Serial.println(output);
           http.close();
           break;
@@ -109,15 +109,14 @@ void sendQuery() {
     };
 
     Serial.print("[HTTP] begin...\n");
-    http.begin("http://httpbin.org/robots.txt");  // HTTP
+    http.begin("http://192.168.1.7:9999/send_signal/asd");  // HTTP
 
-    http.connect_timeout(2000);
-    http.response_timeout(2000);
+    http.connect_timeout(20000);
+    http.response_timeout(20000);
 
     http.reuse(true);
 
     Serial.print("[HTTP] GET...\n");
-    // start connection and send HTTP header
     http.GET(connection_handler);
 
   }
