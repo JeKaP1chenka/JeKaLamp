@@ -9,19 +9,20 @@ void debugData() {
 #if (SERIAL_LOG == 1)
 
   Serial.printf("---------------------------\n");
-  Serial.printf("onOff:\t%d\n", lampSettings.onOff);
-  Serial.printf("effectType:\t%d\n", lampSettings.effectType);
-  Serial.printf("brightness:\t%d\n", lampSettings.brightness);
-  Serial.printf("speed:\t%d\n", lampSettings.speed);
-  Serial.printf("effectParameter:\t%d\n", lampSettings.effectParameter);
-  Serial.printf("microphone:\t%d\n", lampSettings.microphone);
+  Serial.printf("onOff:  %d\t", lampSettings.onOff);
+  Serial.printf("effect: %d\t", lampSettings.effectType);
+  Serial.printf("bright: %d\n", lampSettings.brightness);
+  Serial.printf("speed:  %d\t", lampSettings.speed);
+  Serial.printf("effPar: %d\t", lampSettings.effectParameter);
+  Serial.printf("micro:  %d\n", lampSettings.microphone);
   Serial.printf("\n");
-  Serial.printf("alarmState:\t%d\n", lampSettings.alarmState);
-  Serial.printf("timeBeforeAlarm:\t%d\n", lampSettings.timeBeforeAlarm);
-  Serial.printf("timeAfterAlarm:\t%d\n", lampSettings.timeAfterAlarm);
+  Serial.printf("alarmState:\t%d\t", lampSettings.alarmState);
+  Serial.printf("timeBeforeAlarm: %d\t", lampSettings.timeBeforeAlarm);
+  Serial.printf("timeAfterAlarm: %d\n", lampSettings.timeAfterAlarm);
   for (int i = 0; i < 7; i++) {
-    Serial.printf("day %d:\t%d:%d\n", i, lampSettings.timeOfDays[i * 2],
+    Serial.printf("day %d:\t%d:%d\t", i, lampSettings.timeOfDays[i * 2],
                   lampSettings.timeOfDays[i * 2 + 1]);
+    if (i == 3) Serial.println();
   }
   Serial.printf("\n");
   Serial.printf("wifiName:\t%s\n", lampSettings.wifiName);

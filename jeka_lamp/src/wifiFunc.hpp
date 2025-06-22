@@ -1,7 +1,6 @@
 #ifndef __WIFI_H__
 #define __WIFI_H__
 
-
 #include "include.h"
 
 #if (DISPLAY_DEBUG == 1)
@@ -15,6 +14,9 @@ void wifiInit() {
   WiFi.begin(lampSettings.wifiName, lampSettings.wifiPassword);
   unsigned long startAttemptTime = millis();
 
+  uint16_t temp = 7;
+  BLE::WiFiStatusCharacteristic->setValue(temp);
+  BLE::WiFiStatusCharacteristic->notify();
   while (WiFi.status() != WL_CONNECTED &&
          millis() - startAttemptTime < WIFI_TIMEOUT_MS) {
     delay(100);
@@ -22,7 +24,9 @@ void wifiInit() {
     Serial.print(".");
 #endif
   }
-
+  temp = WiFi.status();
+  BLE::WiFiStatusCharacteristic->setValue(temp);
+  BLE::WiFiStatusCharacteristic->notify();
   if (WiFi.status() == WL_CONNECTED) {
 #if (SERIAL_LOG == 1)
     Serial.println("\nWiFi подключен!");
@@ -31,7 +35,6 @@ void wifiInit() {
     oled.setCursor(5, 7);
     oled.print('Y');
 #endif
-
     blink(127, 2000);
   } else {
 #if (SERIAL_LOG == 1)
@@ -47,6 +50,16 @@ void wifiInit() {
   }
 }
 
+void wiFiStatusNotify() {
+  static uint16_t lastStatus = WL_NO_SHIELD;
+  if (WiFi.status() != lastStatus) {
+    lastStatus = WiFi.status();
+    Serial.printf("wifistatus %d", lastStatus);
+    BLE::WiFiStatusCharacteristic->setValue(lastStatus);
+    BLE::WiFiStatusCharacteristic->notify();
+  }
+}
+
 typedef void (*ResponseCallback)(int httpCode, String payload);
 
 struct RequestData {
@@ -55,103 +68,96 @@ struct RequestData {
 };
 
 void httpRequestTask(void* param) {
-  RequestData* req = (RequestData*) param;
+  RequestData* req = static_cast<RequestData*>(param);
 
   HTTPClient http;
+  http.setTimeout(20000);
   http.begin(req->url);
 
   int httpCode = http.GET();
-  String payload = "";
+  String httpResponse = "";
 
   if (httpCode > 0) {
-    payload = http.getString();
+    httpResponse = http.getString();
+  } else {
+    httpResponse = http.errorToString(httpCode);
   }
 
   // Вызываем callback с результатом
-  req->callback(httpCode, payload);
+  req->callback(httpCode, httpResponse);
 
   http.end();
-  delete req; // Освобождаем память
+  delete req;  // Освобождаем память
   vTaskDelete(NULL);
 }
 
 // Универсальная функция для вызова из любого места
 void asyncHttpGet(String url, ResponseCallback callback) {
   RequestData* req = new RequestData{url, callback};
-  xTaskCreate(
-    httpRequestTask,
-    "httpRequestTask",
-    8192,
-    req,
-    1,
-    NULL
-  );
+  xTaskCreate(httpRequestTask, "httpRequestTask", 8192, req, 1, NULL);
 }
 
-// void sendAsyncHttpRequest(const char* host, int port, String request,
-//                           void (*callback)(String)) {
-//   static WiFiClient client;
-//   static bool requestSent = false;
-//   static unsigned long requestStartTime = 0;
-//   static const unsigned long timeout = 5000;  // Таймаут ожидания (5 сек)
-//   static String requestData;
-//   static void (*responseCallback)(String response) =
-//       nullptr;  // Callback-функция
+void sendAsyncHttpRequest(const char* host, int port, String request,
+                          void (*callback)(String)) {
+  static WiFiClient client;
+  static bool requestSent = false;
+  static unsigned long requestStartTime = 0;
+  static const unsigned long timeout = 5000;  // Таймаут ожидания (5 сек)
+  static String requestData;
+  static void (*responseCallback)(String response) =
+      nullptr;  // Callback-функция
 
-//   if (!requestSent) {
-//     if (client.connect(host, port)) {
-// #if (SERIAL_LOG == 1)
+  if (!requestSent) {
+    if (client.connect(host, port)) {
+#if (SERIAL_LOG == 1)
 
-//       Serial.println("Подключились к серверу");
-// #endif
+      Serial.println("Подключились к серверу");
+#endif
 
-//       // Сохраняем запрос и callback
-//       requestData = request;
-//       responseCallback = callback;
+      // Сохраняем запрос и callback
+      requestData = request;
+      responseCallback = callback;
 
-//       // Отправляем HTTP-запрос
-//       client.print(request);
+      // Отправляем HTTP-запрос
+      client.print(request);
 
-//       requestSent = true;
-//       requestStartTime = millis();
-//     } else {
-// #if (SERIAL_LOG == 1)
+      requestSent = true;
+      requestStartTime = millis();
+    } else {
+#if (SERIAL_LOG == 1)
+      Serial.println("Ошибка подключения к серверу");
+#endif
 
-//       Serial.println("Ошибка подключения к серверу");
-// #endif
+      requestSent = false;
+    }
+  }
 
-//       requestSent = false;
-//     }
-//   }
+  // Проверяем, есть ли данные в буфере
+  if (requestSent && client.available()) {
+    String response = client.readString();  // Читаем ответ
+#if (SERIAL_LOG == 1)
+    Serial.println("Ответ сервера получен.");
+#endif
 
-//   // Проверяем, есть ли данные в буфере
-//   if (requestSent && client.available()) {
-//     String response = client.readString();  // Читаем ответ
-// #if (SERIAL_LOG == 1)
+    // Вызываем callback-функцию, если она есть
+    if (responseCallback) {
+      responseCallback(response);
+    }
 
-//     Serial.println("Ответ сервера получен.");
-// #endif
+    // Закрываем соединение
+    client.stop();
+    requestSent = false;
+  }
 
-//     // Вызываем callback-функцию, если она есть
-//     if (responseCallback) {
-//       responseCallback(response);
-//     }
+  // Закрываем соединение, если превышен таймаут
+  if (requestSent && millis() - requestStartTime > timeout) {
+#if (SERIAL_LOG == 1)
+    Serial.println("Время ожидания истекло, закрываем соединение");
+#endif
 
-//     // Закрываем соединение
-//     client.stop();
-//     requestSent = false;
-//   }
-
-//   // Закрываем соединение, если превышен таймаут
-//   if (requestSent && millis() - requestStartTime > timeout) {
-// #if (SERIAL_LOG == 1)
-
-//     Serial.println("Время ожидания истекло, закрываем соединение");
-// #endif
-
-//     client.stop();
-//     requestSent = false;
-//   }
-// }
+    client.stop();
+    requestSent = false;
+  }
+}
 
 #endif  // __WIFI_H__

@@ -8,8 +8,9 @@ services:
     environment:
       POSTGRES_PASSWORD: sqlMaxSql
     ports:
-      - "5432:5432"
-    container_name: postgres_instance
+      - "5434:5432"
+    container_name: lamp_postgres_instance
+
 
   lamp_control_api:
     build:
@@ -20,7 +21,8 @@ services:
     ports:
       - "9999:9999"
     container_name: lamp_control_api_instance
-    depends_on:
-      - postgres
 
-  
+
+networks:
+  app_network:
+    driver: bridge

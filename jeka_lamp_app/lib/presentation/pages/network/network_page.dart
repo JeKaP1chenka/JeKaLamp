@@ -44,6 +44,7 @@ class _NetworkState extends State<NetworkPage> {
   wifiInputs() {
     return Column(
       children: [
+        SizedBox(height: 10),
         TextField(
           controller: cubit.wifiNameController,
           decoration: InputDecoration(
@@ -81,22 +82,37 @@ class _NetworkState extends State<NetworkPage> {
               },
               child: Text('t2'),
             ),
-            
             ElevatedButton(
               style: AppTheme.buttonStyle,
               onPressed: () {
                 cubit.wifiNameController.text = "SAD8 K2";
                 cubit.wifiPasswordController.text = "green1158490";
               },
-              child: Text('t2'),
+              child: Text('t3'),
             ),
-
+          ],
+        ),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("WiFi state: " + _state.wiFiStateString),
             ElevatedButton(
-              style: AppTheme.buttonStyle,
-              onPressed: () {
-                cubit.sendData();
-              },
-              child: Text('Send'),
+              style: AppTheme.buttonStyle.copyWith(
+                fixedSize: WidgetStateProperty.all<Size>(Size(81, 40)),
+              ),
+              onPressed: _state.wiFiConnecting
+                  ? null
+                  : () {
+                      cubit.sendData();
+                    },
+              child: _state.wiFiConnecting
+                  ? SizedBox(
+                      height: 25,
+                      width: 25,
+                      child: CircularProgressIndicator(),
+                    )
+                  : Text('Send'),
             )
           ],
         ),

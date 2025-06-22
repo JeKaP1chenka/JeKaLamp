@@ -9,16 +9,6 @@
 
 namespace BLE {
 
-bool deviceConnected = false;
-BLEServer *pServer;
-BLEService *pService;
-BLECharacteristic *onOffCharacteristic;
-BLECharacteristic *parametersCharacteristic;
-BLECharacteristic *alarmCharacteristic;
-BLECharacteristic *NetworkCharacteristic;
-BLECharacteristic *TimeCharacteristic;
-BLECharacteristic *ConnectionLampCharacteristic;
-
 namespace Callbacks {
 
 class ServerCallbacks : public BLEServerCallbacks {
@@ -240,6 +230,15 @@ class ConnectionLampParametersCallbacks : public BLECharacteristicCallbacks {
   }
 };
 
+class WiFiStatusCallbacks : public BLECharacteristicCallbacks {
+ public:
+  void onWrite(BLECharacteristic *pCharacteristic) override {}
+  void onRead(BLECharacteristic *pCharacteristic) override {
+    uint16_t temp = static_cast<uint16_t>(WiFi.status());
+    pCharacteristic->setValue(temp);
+  }
+};
+
 // class TimeParametersCallbacks : public BLECharacteristicCallbacks {
 
 //  public:
@@ -275,7 +274,6 @@ void initBLE(LampSettings *lampSettings) {
 
   pServer = BLEDevice::createServer();
   pServer->setCallbacks(new Callbacks::ServerCallbacks());
-
   pService = pServer->createService(LAMP_STATE_SERVICE_UUID);
 
   onOffCharacteristic = pService->createCharacteristic(
@@ -302,7 +300,10 @@ void initBLE(LampSettings *lampSettings) {
       new Callbacks::AlarmParametersCallbacks(lampSettings));
   alarmCharacteristic->addDescriptor(new BLE2902());
 
-  NetworkCharacteristic = pService->createCharacteristic(
+  pServiceNetwork = pServer->createService(LAMP_NETWORK_STATE_SERVICE_UUID);
+
+  //
+  NetworkCharacteristic = pServiceNetwork->createCharacteristic(
       NETWORK_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
                                        BLECharacteristic::PROPERTY_WRITE |
                                        BLECharacteristic::PROPERTY_NOTIFY);
@@ -310,7 +311,8 @@ void initBLE(LampSettings *lampSettings) {
       new Callbacks::NetworkParametersCallbacks());
   NetworkCharacteristic->addDescriptor(new BLE2902());
 
-  ConnectionLampCharacteristic = pService->createCharacteristic(
+  //* Connection Lamp string
+  ConnectionLampCharacteristic = pServiceNetwork->createCharacteristic(
       CONNECTION_LAMP_CHARACTERISTIC_UUID,
       BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |
           BLECharacteristic::PROPERTY_NOTIFY);
@@ -318,6 +320,13 @@ void initBLE(LampSettings *lampSettings) {
       new Callbacks::NetworkParametersCallbacks());
   ConnectionLampCharacteristic->addDescriptor(new BLE2902());
 
+  //* WiFi Status
+  WiFiStatusCharacteristic = pServiceNetwork->createCharacteristic(
+      WIFI_STATUS_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
+                                           BLECharacteristic::PROPERTY_WRITE |
+                                           BLECharacteristic::PROPERTY_NOTIFY);
+  WiFiStatusCharacteristic->setCallbacks(new Callbacks::WiFiStatusCallbacks());
+  WiFiStatusCharacteristic->addDescriptor(new BLE2902());
   // TimeCharacteristic = pService->createCharacteristic(
   //     ALARM_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_READ |
   //                                    BLECharacteristic::PROPERTY_WRITE |
@@ -327,6 +336,7 @@ void initBLE(LampSettings *lampSettings) {
   // TimeCharacteristic->addDescriptor(new BLE2902());
 
   pService->start();
+  pServiceNetwork->start();
 
   pServer->getAdvertising()->start();
 #if (SERIAL_LOG == 1)

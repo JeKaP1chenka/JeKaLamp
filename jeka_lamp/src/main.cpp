@@ -1,8 +1,6 @@
 #include <bitset>
 #include <main.hpp>
 
-#include "AsyncHTTP/async_http_client.h"
-#include "WiFiMulti.h"
 // Глобальные переменные
 
 // uint8_t myData[2] = {0, 0};
@@ -50,15 +48,24 @@ void loop() {
   effectTick();
   sound.tick();
   yield();
+  wiFiStatusNotify();
   //! timeTick();
-#if (DISPLAY_DEBUG == 1)
+  #if (DISPLAY_DEBUG == 1)
   updateDisplay();
-#endif
+  #endif
 
   if (BLE::deviceConnected) {
   }
 }
-void sendQuery();
+// void sendQuery(void *parameter);
+
+volatile bool done = true;
+void callback(int httpCode, String response){
+    Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode,
+                  response.c_str());
+    done = true;
+}
+
 void btnUpdate() {
   static timerMillis tmr(100, true);
   if (!tmr.isReady()) return;
@@ -67,7 +74,13 @@ void btnUpdate() {
   if (!btn and switchBtn) {
     switchBtn = false;
     debugDataUpdate();
-    sendQuery();
+    if (done and WiFi.isConnected()) {
+      done = false;
+      // xTaskCreate(sendQuery, "sendQuery", 8192, NULL, 1, NULL);
+      asyncHttpGet("http://192.168.1.7:9999/send_signal/asd", callback);
+    } else {
+      Serial.println("task don`t finish");
+    }
   } else if (btn and !switchBtn) {
     switchBtn = true;
   }
@@ -75,73 +88,31 @@ void btnUpdate() {
 void onResponse(int httpCode, String response) {
   Serial.printf("Ответ HTTP %d: %s\n", httpCode, response.c_str());
 }
-bool done;
-// WiFiMulti wifiMulti;
-void sendQuery() {
-  AsyncHTTPClient http;
-  done = false;
-  if ((WiFi.status() == WL_CONNECTED)) {
-    Serial.print("IP address of Device: ");
-    Serial.println(WiFi.localIP().toString().c_str());
+// void sendQuery(void *parameter) {
+//   if (WiFi.isConnected()) {
+//     Serial.println("start sendQuery");
+//     HTTPClient http;
+//     http.setTimeout(20000);
+//     http.begin("http://192.168.1.7:9999/send_signal/asd");
 
-    String output;
+//     String httpResponse = "";
+//     int httpCode = 0;
+//     httpCode = http.GET();
+//     if (httpCode > 0) {
+//       httpResponse = http.getString();
+//     } else {
+//       httpResponse = "Error: " + http.errorToString(httpCode);
+//     }
 
-    auto connection_handler = [&](HTTPConnectionState state) {
-      Serial.print("New state: ");
-      Serial.println((int)state);
-      Serial.flush();
+//     http.end();
+//     Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode,
+//                   httpResponse.c_str());
 
-      switch (state) {
-        case HTTPConnectionState::ERROR:
-          Serial.print("Received error: ");
-          Serial.println(http.error_string(http.last_error()));
-          http.close();
-          break;
-        case HTTPConnectionState::DONE:
-          Serial.println("ALL DONE");
-          output = http.response_arduino_string();
-          Serial.println(output);
-          http.close();
-          break;
-        default:
-          break;
-      }
-    };
-
-    Serial.print("[HTTP] begin...\n");
-    http.begin("http://192.168.1.7:9999/send_signal/asd");  // HTTP
-
-    http.connect_timeout(20000);
-    http.response_timeout(20000);
-
-    http.reuse(true);
-
-    Serial.print("[HTTP] GET...\n");
-    http.GET(connection_handler);
-
-  }
-  // Serial.println("start sendQuery");
-  // // asyncHttpGet("https://httpbin.org/get", onResponse);
-  // HTTPClient http;
-  // http.setTimeout(20000);
-  // http.begin("http://192.168.0.39:9999/send_signal/asd");
-
-  // String httpResponse = "";
-  // int httpCode = 0;
-  // // Делаем запрос (синхронно, но вызывается из таймера, не из loop)
-  // httpCode = http.GET();
-  // if (httpCode > 0) {
-  //   httpResponse = http.getString();
-  // } else {
-  //   httpResponse = "Error: " + http.errorToString(httpCode);
-  // }
-
-  // http.end();
-  // Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode,
-  // httpResponse.c_str());
-
-  // Serial.println("end sendQuery");
-}
+//     Serial.println("end sendQuery");
+//   }
+//   done = true;
+//   vTaskDelete(NULL);  // удалить задачу после завершения
+// }
 
 void debugDataUpdate() {
   lampSettings.effectType = rand() % 10;

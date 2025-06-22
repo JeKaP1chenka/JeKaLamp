@@ -29,9 +29,9 @@ Preferences preferences;
 #include "utils/Time.h"
 #include "utils/timerMillis.h"
 #include <ledMatrix.hpp>
+#include <BLE.hpp>
 #include "wifiFunc.hpp"
 #include <data.hpp>
-#include <BLE.hpp>
 #if (DISPLAY_DEBUG == 1)
 #include <display.hpp>
 #endif

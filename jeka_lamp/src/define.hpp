@@ -11,9 +11,12 @@
 #define ON_OFF_CHARACTERISTIC_UUID "1234"
 #define PARAMETERS_CHARACTERISTIC_UUID "1235"
 #define ALARM_CHARACTERISTIC_UUID "1236"
-#define NETWORK_CHARACTERISTIC_UUID "1237"
-#define CONNECTION_LAMP_CHARACTERISTIC_UUID "1238"
-#define TIME_CHARACTERISTIC_UUID "1239"
+
+
+#define LAMP_NETWORK_STATE_SERVICE_UUID "1235"
+#define NETWORK_CHARACTERISTIC_UUID "1234"
+#define CONNECTION_LAMP_CHARACTERISTIC_UUID "1235"
+#define WIFI_STATUS_CHARACTERISTIC_UUID "1236"
 
 #define SAVE_TO_FLASH_DELAY 30000
 
@@ -45,6 +48,20 @@
 const char* url = "http://185.221.215.59:9999/";
 #define WIFI_TIMEOUT_MS 10000
 
+namespace BLE {
 
+bool deviceConnected = false;
+BLEServer *pServer;
+BLEService *pService;
+BLECharacteristic *onOffCharacteristic;
+BLECharacteristic *parametersCharacteristic;
+BLECharacteristic *alarmCharacteristic;
+BLECharacteristic *TimeCharacteristic;
+
+BLEService *pServiceNetwork;
+BLECharacteristic *NetworkCharacteristic;
+BLECharacteristic *ConnectionLampCharacteristic;
+BLECharacteristic *WiFiStatusCharacteristic;
+}
 
 #endif  // __DEFINE_H__

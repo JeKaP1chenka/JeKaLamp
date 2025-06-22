@@ -135,7 +135,7 @@ class SendData {
   }
 
   void sendNetworkSettings() {
-    var s = _bluetoothManager.getService("LampState");
+    var s = _bluetoothManager.getService("Network");
     var ch = s?.getCharacteristic("network");
     if (s != null && ch != null) {
       _bluetoothConnect.writeData(
@@ -149,7 +149,7 @@ class SendData {
   }
 
   void sendConnectionLamp() {
-    var s = _bluetoothManager.getService("LampState");
+    var s = _bluetoothManager.getService("Network");
     var ch = s?.getCharacteristic("connectionLamp");
     if (s != null && ch != null) {
       _bluetoothConnect.writeData(

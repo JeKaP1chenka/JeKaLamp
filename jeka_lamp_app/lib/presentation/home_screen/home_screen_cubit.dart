@@ -27,51 +27,60 @@ class HomeScreenCubit extends Cubit<HomeScreenState> {
           ),
         ) {
     di.s1<BluetoothConnect>().connectionStateStream.listen(
-      (results) {
+      (results) async {
         if (results is BCOffState) {
           emit(state.copyWith(uiBloc: true));
         } else if (results is BCConnectedState) {
+          try {
+            await Future.wait([
+              di.s1<BluetoothConnect>().receiveData(
+                    onValueReceived,
+                    serviceUuidStr: "1234",
+                    characteristicUuidStr: "1234",
+                  ),
+              di.s1<BluetoothConnect>().receiveData(
+                    di.s1<EffectCubit>().onValueReceived,
+                    serviceUuidStr: "1234",
+                    characteristicUuidStr: "1235",
+                  ),
+              di.s1<BluetoothConnect>().receiveData(
+                    di.s1<AlarmCubit>().onValueReceived,
+                    serviceUuidStr: "1234",
+                    characteristicUuidStr: "1236",
+                  ),
+              di.s1<BluetoothConnect>().receiveData(
+                    di.s1<NetworkCubit>().onValueReceived,
+                    serviceUuidStr: "1235",
+                    characteristicUuidStr: "1234",
+                  ),
+              di.s1<BluetoothConnect>().receiveData(
+                    di.s1<NetworkCubit>().onValueReceivedConnectionLamp,
+                    serviceUuidStr: "1235",
+                    characteristicUuidStr: "1235",
+                  ),
+                  
+              di.s1<BluetoothConnect>().receiveData(
+                    di.s1<NetworkCubit>().onValueReceivedWiFi,
+                    serviceUuidStr: "1235",
+                    characteristicUuidStr: "1236",
+                  ),
 
-          di.s1<BluetoothConnect>().receiveData(
-                onValueReceived,
-                serviceUuidStr: "1234",
-                characteristicUuidStr: "1234",
-              );
-          di.s1<BluetoothConnect>().receiveData(
-                di.s1<EffectCubit>().onValueReceived,
-                serviceUuidStr: "1234",
-                characteristicUuidStr: "1235",
-              );
-          di.s1<BluetoothConnect>().receiveData(
-                di.s1<AlarmCubit>().onValueReceived,
-                serviceUuidStr: "1234",
-                characteristicUuidStr: "1236",
-              );
-          di.s1<BluetoothConnect>().receiveData(
-                di.s1<NetworkCubit>().onValueReceived,
-                serviceUuidStr: "1234",
-                characteristicUuidStr: "1237",
-              );
+            ]);
+            await Future.delayed(const Duration(milliseconds: 1100));
 
-          di.s1<BluetoothConnect>().receiveData(
-                di.s1<NetworkCubit>().onValueReceivedConnectionLamp,
-                serviceUuidStr: "1234",
-                characteristicUuidStr: "1238",
-              );
+            // di.s1<BluetoothConnect>().readData(
+            //       serviceUuidStr: "1234",
+            //       characteristicUuidStr: "1234",
+            //     );
 
-          
-
-          // di.s1<BluetoothConnect>().readData(
-          //       serviceUuidStr: "1234",
-          //       characteristicUuidStr: "1234",
-          //     );
-              
-          // di.s1<BluetoothConnect>().readData(
-          //       serviceUuidStr: "1234",
-          //       characteristicUuidStr: "1235",
-          //     );
-          emit(state.copyWith(uiBloc: false));
-
+            // di.s1<BluetoothConnect>().readData(
+            //       serviceUuidStr: "1234",
+            //       characteristicUuidStr: "1235",
+            //     );
+            emit(state.copyWith(uiBloc: false));
+          } catch (e) {
+            print('Error: $e');
+          }
         }
       },
       onDone: () {},

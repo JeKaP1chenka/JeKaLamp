@@ -8,7 +8,8 @@ class BluetoothCharacteristic {
 
 class BluetoothService {
   String uuid; // UUID сервиса
-  Map<String, BluetoothCharacteristic> characteristics; // Словарь характеристик по имени
+  Map<String, BluetoothCharacteristic>
+      characteristics; // Словарь характеристик по имени
 
   BluetoothService({required this.uuid, required this.characteristics});
 
@@ -27,11 +28,13 @@ class BluetoothManager {
         "on/off": BluetoothCharacteristic(uuid: "1234"),
         "parameters": BluetoothCharacteristic(uuid: "1235"),
         "alarm": BluetoothCharacteristic(uuid: "1236"),
-        "network": BluetoothCharacteristic(uuid: "1237"),
-        "connectionLamp": BluetoothCharacteristic(uuid: "1238"),
-        "time": BluetoothCharacteristic(uuid: "1238"),
       },
     ),
+    "Network": BluetoothService(uuid: "1235", characteristics: {
+      "network": BluetoothCharacteristic(uuid: "1234"),
+      "connectionLamp": BluetoothCharacteristic(uuid: "1235"),
+      "wifi": BluetoothCharacteristic(uuid: "1236"),
+    })
     // "EffectState": BluetoothService(
     //   uuid: "1235",
     //   characteristics: {

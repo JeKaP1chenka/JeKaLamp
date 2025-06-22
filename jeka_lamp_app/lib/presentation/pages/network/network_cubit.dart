@@ -15,11 +15,24 @@ class NetworkCubit extends Cubit<NetworkState> {
 
   SendData? _sendData;
 
+  final Map<int, String> outputString = {
+    0: "IDLE status",
+    1: "No connection",
+    2: "Scan completed",
+    3: "Connected",
+    4: "Connect failed",
+    5: "connection_lost",
+    6: "Disconnected",
+    7: "Connecting"
+  };
+
   NetworkCubit()
       : super(const NetworkState(
           wifiName: "",
           wifiPassword: "",
           connectionLamp: "",
+          wiFiStateString: "",
+          wiFiConnecting: false,
         ));
   void onValueReceived(List<int> values) {
     String result = String.fromCharCodes(values);
@@ -44,6 +57,14 @@ class NetworkCubit extends Cubit<NetworkState> {
     connectionLampController.text = result;
   }
 
+  void onValueReceivedWiFi(List<int> values) {
+    String temp = "WiFi unknown error";
+    if (outputString.containsKey(values[0])) {
+      temp = outputString[values[0]]!;
+    }
+    emit(state.copyWith(wiFiStateString: temp, wiFiConnecting: false));
+  }
+
   void updateWifiName(String value) {
     // emit(state.copyWith(wifiName: value));
     // wifiNameController.text = value;
@@ -65,14 +86,14 @@ class NetworkCubit extends Cubit<NetworkState> {
     emit(state.copyWith(
       wifiName: wifiNameController.text,
       wifiPassword: wifiPasswordController.text,
+      wiFiStateString: outputString[7],
+      wiFiConnecting: true,
     ));
     _sendData?.sendNetworkSettings();
   }
 
   void sendConnectionLamp() {
-    emit(state.copyWith(
-      connectionLamp: connectionLampController.text
-    ));
+    emit(state.copyWith(connectionLamp: connectionLampController.text));
     _sendData?.sendConnectionLamp();
   }
 
