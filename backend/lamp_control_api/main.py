@@ -8,7 +8,7 @@ app = FastAPI()
 # Database configuration
 DB_CONFIG = {
     "dbname": "lampdb",
-    "host": "postgres",
+    "host": "postgres_backend",
     "user": "postgres",
     "password": "sqlMaxSql",
     "port": "5432"
@@ -83,7 +83,7 @@ def check_status(lamp_name: str):
         cursor.execute(
             """SELECT id FROM messages 
             WHERE lamp_connection_id = %s AND is_read = FALSE 
-            ORDER BY created_at DESC LIMIT 1""",
+            ORDER BY id DESC LIMIT 1""",
             (connection_id,)
         )
         message_result = cursor.fetchone()
