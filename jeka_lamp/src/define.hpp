@@ -3,8 +3,14 @@
 
 #include "include.h"
 
+// #define DD 1
+
 // настройка BLE сурвера
+#if (DD == 1)
+#define BLE_SERVER_NAME "JeKaLamp_REV1_debug"
+#else
 #define BLE_SERVER_NAME "JeKaLamp_REV1"
+#endif
 
 // UUID сервисов и характеристик
 #define LAMP_STATE_SERVICE_UUID "1234"

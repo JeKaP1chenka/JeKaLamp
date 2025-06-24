@@ -29,6 +29,7 @@ Preferences preferences;
 #include "utils/Time.h"
 #include "utils/timerMillis.h"
 #include <ledMatrix.hpp>
+#include "network.hpp"
 #include <BLE.hpp>
 #include "wifiFunc.hpp"
 #include <data.hpp>

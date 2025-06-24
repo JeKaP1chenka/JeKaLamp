@@ -27,7 +27,7 @@ void debugData() {
   Serial.printf("\n");
   Serial.printf("wifiName:\t%s\n", lampSettings.wifiName);
   Serial.printf("wifiPassword:\t%s\n", lampSettings.wifiPassword);
-
+  Serial.printf("connectionLamp:\t%s\n", lampSettings.connectionLamp);
   Serial.printf("---------------------------\n");
 #endif  // SERIAL_LOG
 }

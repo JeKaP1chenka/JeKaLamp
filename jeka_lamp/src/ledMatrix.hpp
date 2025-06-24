@@ -13,17 +13,60 @@ void fillAll(CRGB color) {
   }
 }
 
-void blink(uint8_t hue, uint32_t ms) {
-  auto d = ms / 30;
-  for (int i = 0; i <= 15; i++) {
-    fillAll(CHSV(hue, 255, (255 / 15) * i));
-    FastLED.show();
-    delay(d);
+void fillAll(CHSV color) {
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = color;
   }
-  for (int i = 15; i >= 0; i--) {
-    fillAll(CHSV(hue, 255, (255 / 15) * i));
+}
+// void blink(uint8_t hue, uint32_t ms) {
+//   auto d = ms / 30;
+//   for (int i = 0; i <= 15; i++) {
+//     fillAll(CHSV(hue, 255, (255 / 15) * i));
+//     FastLED.show();
+//     delay(d);
+//   }
+//   for (int i = 15; i >= 0; i--) {
+//     fillAll(CHSV(hue, 255, (255 / 15) * i));
+//     FastLED.show();
+//     delay(d);
+//   }
+// }
+static int blinkHue = -1;
+static uint32_t blinkDurationMs;
+void blink(uint8_t hue, uint32_t duration_ms) {
+  blinkHue = hue;
+  blinkDurationMs - duration_ms;
+}
+
+void blinkTick() {
+  if (blinkHue != -1) {
+    const uint8_t steps = 100;
+    const uint16_t delay_time = blinkDurationMs / (steps * 2);
+    const auto temp = FastLED.getBrightness();
+    FastLED.setBrightness(255);
+    Serial.printf("func: blink: start\n");
+    Serial.printf("func: blink: for1\n");
+    for (int i = 0; i <= steps; i++) {
+      uint8_t brightness = map(i, 0, steps, 0, 100);
+      fillAll(CHSV(blinkHue, 255, brightness));
+      delay(delay_time);
+      FastLED.show();
+    }
+
+    // Плавное уменьшение яркости
+    Serial.printf("func: blink: for2\n");
+    for (int i = steps; i >= 0; i--) {
+      uint8_t brightness = map(i, 0, steps, 0, 100);
+      fillAll(CHSV(blinkHue, 255, brightness));
+      delay(delay_time);
+      FastLED.show();
+    }
+
+    // Очистка (необязательно, зависит от логики программы)
+    // fillAll(CRGB::Black);
     FastLED.show();
-    delay(d);
+    FastLED.setBrightness(temp);
+    blinkHue = -1;
   }
 }
 

@@ -147,7 +147,7 @@ class _NetworkState extends State<NetworkPage> {
           child: ElevatedButton(
             style: AppTheme.buttonStyle,
             onPressed: () {
-              cubit.sendData();
+              cubit.sendConnectionLamp();
             },
             child: Text('Send'),
           ),

@@ -165,6 +165,7 @@ class NetworkParametersCallbacks : public BLECharacteristicCallbacks {
 #endif
       updateData();
       wifiInit();
+      networkInit();
     } else {
 #if (SERIAL_LOG == 1)
       Serial.printf(
@@ -204,14 +205,14 @@ class ConnectionLampParametersCallbacks : public BLECharacteristicCallbacks {
       // lampSettings.wifiName[sizeof(lampSettings.wifiName) - 1] = '\0';
       // lampSettings.wifiPassword[sizeof(lampSettings.wifiPassword) - 1] =
       // '\0';
-      lampSettings.connectionLamp[str.size() - 1] = '\0';
+      lampSettings.connectionLamp[str.size()] = '\0';
 #if (SERIAL_LOG == 1)
 
       Serial.println("Настройки WiFi обновлены!");
       Serial.printf("--------------------\n\t%s\n--------------------\n",
                     lampSettings.connectionLamp);
 #endif
-
+      connectionLamps();
       updateData();
     } else {
 #if (SERIAL_LOG == 1)
@@ -317,7 +318,7 @@ void initBLE(LampSettings *lampSettings) {
       BLECharacteristic::PROPERTY_READ | BLECharacteristic::PROPERTY_WRITE |
           BLECharacteristic::PROPERTY_NOTIFY);
   ConnectionLampCharacteristic->setCallbacks(
-      new Callbacks::NetworkParametersCallbacks());
+      new Callbacks::ConnectionLampParametersCallbacks());
   ConnectionLampCharacteristic->addDescriptor(new BLE2902());
 
   //* WiFi Status

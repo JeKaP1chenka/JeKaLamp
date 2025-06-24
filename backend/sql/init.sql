@@ -33,5 +33,5 @@ CREATE TABLE IF NOT EXISTS messages (
     is_read BOOLEAN,
     message_content TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (lamp_connection_id) REFERENCES lamp_connections(id)
+    FOREIGN KEY (lamp_connection_id) REFERENCES lamp_connections(id) ON DELETE CASCADE
 );

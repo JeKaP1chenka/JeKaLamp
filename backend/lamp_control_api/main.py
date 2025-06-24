@@ -22,7 +22,10 @@ class LampData(BaseModel):
     lamp_name: str
     target_lamp_name: str
 
-@app.post("/register_lamp/{lamp_name}", status_code=status.HTTP_201_CREATED)
+# 201 - ok
+# 409 - lamp name is create
+# 500 - exception
+@app.get("/register_lamp/{lamp_name}", status_code=status.HTTP_201_CREATED)
 def register_lamp(lamp_name: str):
     cursor = connection.cursor()
     try:
@@ -45,7 +48,11 @@ def register_lamp(lamp_name: str):
     finally:
         cursor.close()
 
-@app.get("/check_status/{lamp_name}")
+# 200 - ok
+# 210 - lamp not found
+# 211 - connection not found
+# 500 - exception
+@app.get("/check_status/{lamp_name}", status_code=status.HTTP_200_OK)
 def check_status(lamp_name: str):
     cursor = connection.cursor()
     try:
@@ -58,7 +65,7 @@ def check_status(lamp_name: str):
         
         if not lamp_result:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=210,
                 detail="Lamp not found"
             )
         
@@ -72,8 +79,9 @@ def check_status(lamp_name: str):
         connection_result = cursor.fetchone()
 
         if not connection_result:
+            
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=211,
                 detail="No connection found for this lamp"
             )
 
@@ -99,14 +107,14 @@ def check_status(lamp_name: str):
                 "UPDATE lamps SET last_check = CURRENT_TIMESTAMP WHERE id = %s",
                 (lamp_id,)
             )
-            return {"has_message": True}
+            return "1"
 
         # Update last check time
         cursor.execute(
             "UPDATE lamps SET last_check = CURRENT_TIMESTAMP WHERE id = %s",
             (lamp_id,)
         )
-        return {"has_message": False}
+        return "0"
 
     except HTTPException:
         raise
@@ -118,7 +126,11 @@ def check_status(lamp_name: str):
     finally:
         cursor.close()
 
-@app.post("/send_signal/{lamp_name}", status_code=status.HTTP_200_OK)
+# 200 - ok
+# 210 - lamp not found
+# 211 - connection not found
+# 500 - exception
+@app.get("/send_signal/{lamp_name}", status_code=status.HTTP_200_OK)
 def send_signal(lamp_name: str):
     cursor = connection.cursor()
     try:
@@ -131,7 +143,7 @@ def send_signal(lamp_name: str):
 
         if not lamp_result:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=210,
                 detail="Lamp not found"
             )
 
@@ -146,7 +158,7 @@ def send_signal(lamp_name: str):
 
         if not connection_result:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=211,
                 detail="No connection found between the lamps"
             )
 
@@ -172,31 +184,42 @@ def send_signal(lamp_name: str):
     finally:
         cursor.close()
 
-@app.post("/connect_lamps/", status_code=status.HTTP_201_CREATED)
-def connect_lamps(lamp_data: LampData):
+# 201 - ok
+# 210 - lamp name is create
+# 211 - Lamps are already connected 
+# 500 - exception
+@app.get("/connect_lamps/{lamp_name}/{target_lamp_name}", status_code=status.HTTP_201_CREATED)
+def connect_lamps(lamp_name: str, target_lamp_name:str):
     cursor = connection.cursor()
     try:
         # Get lamp IDs
         cursor.execute(
             "SELECT id FROM lamps WHERE lamp_name = %s", 
-            (lamp_data.lamp_name,)
+            (lamp_name,)
         )
         lamp_result = cursor.fetchone()
 
         cursor.execute(
             "SELECT id FROM lamps WHERE lamp_name = %s", 
-            (lamp_data.target_lamp_name,)
+            (target_lamp_name,)
         )
         target_lamp_result = cursor.fetchone()
 
         if not lamp_result or not target_lamp_result:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=210,
                 detail="One or both lamps not found"
             )
 
         lamp_id = lamp_result[0]
         target_lamp_id = target_lamp_result[0]
+
+        cursor.execute(
+            """DELETE FROM lamp_connections 
+            WHERE lamp_id = %s OR target_lamp_id = %s
+            OR lamp_id = %s OR target_lamp_id = %s""",
+            (lamp_id, lamp_id, target_lamp_id, target_lamp_id)
+        )
 
         # Check if connection already exists
         cursor.execute(
@@ -206,7 +229,7 @@ def connect_lamps(lamp_data: LampData):
         )
         if cursor.fetchone():
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=211,
                 detail="Lamps are already connected"
             )
 

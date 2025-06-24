@@ -14,6 +14,7 @@ static void debugDataUpdate();
 void setup() {
   loadData();
   wifiInit();
+  setupTask();
 
   // Serial init
 #if (SERIAL_LOG == 1)
@@ -48,11 +49,13 @@ void loop() {
   effectTick();
   sound.tick();
   yield();
-  wiFiStatusNotify();
+  wiFiStatusTick();
   //! timeTick();
-  #if (DISPLAY_DEBUG == 1)
+  checkSignal();
+  blinkTick();
+#if (DISPLAY_DEBUG == 1)
   updateDisplay();
-  #endif
+#endif
 
   if (BLE::deviceConnected) {
   }
@@ -60,27 +63,26 @@ void loop() {
 // void sendQuery(void *parameter);
 
 volatile bool done = true;
-void callback(int httpCode, String response){
-    Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode,
-                  response.c_str());
-    done = true;
+void callback(int httpCode, String response) {
+  Serial.printf("HTTP Code: %d\nResponse:\n%s\n", httpCode, response.c_str());
+  done = true;
 }
 
 void btnUpdate() {
   static timerMillis tmr(100, true);
   if (!tmr.isReady()) return;
+#if (DD == 1)
   auto btn = digitalRead(17);
+#else
+  auto btn = digitalRead(2);
+#endif
   // Serial.printf("%d %d\n", switchBtn, btn);
   if (!btn and switchBtn) {
     switchBtn = false;
-    debugDataUpdate();
-    if (done and WiFi.isConnected()) {
-      done = false;
-      // xTaskCreate(sendQuery, "sendQuery", 8192, NULL, 1, NULL);
-      asyncHttpGet("http://192.168.1.7:9999/send_signal/asd", callback);
-    } else {
-      Serial.println("task don`t finish");
-    }
+    // debugDataUpdate();
+    blink(123, 2000);
+
+    sendSignal();
   } else if (btn and !switchBtn) {
     switchBtn = true;
   }

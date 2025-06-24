@@ -9,4 +9,5 @@ GyverOLED<SSD1306_128x64> oled;
 
 LampSettings lampSettings;
 
+
 #endif // __GLOBAL_H__
