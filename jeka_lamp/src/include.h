@@ -16,6 +16,7 @@ Preferences preferences;
 #include <FastLED.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <GyverNTP.h>
 
 #include <define.hpp>
 
@@ -29,6 +30,7 @@ Preferences preferences;
 #include "utils/Time.h"
 #include "utils/timerMillis.h"
 #include <ledMatrix.hpp>
+#include "alarm.hpp"
 #include "network.hpp"
 #include <BLE.hpp>
 #include "wifiFunc.hpp"

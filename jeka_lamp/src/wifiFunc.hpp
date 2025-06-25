@@ -51,6 +51,8 @@ void wifiInit() {
     sendHttpCode = 0;
     checkHttpCode = 0;
     blink(146, 1000);
+    NTP.begin(7);
+    
   } else {
 #if (SERIAL_LOG == 1)
     Serial.println(

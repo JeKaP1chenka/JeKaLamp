@@ -53,6 +53,7 @@ void loop() {
   //! timeTick();
   checkSignal();
   blinkTick();
+  alarmTick();
 #if (DISPLAY_DEBUG == 1)
   updateDisplay();
 #endif
